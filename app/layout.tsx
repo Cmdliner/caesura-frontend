@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Akaya_Kanadaka, Geist_Mono, Sora } from "next/font/google";
+import SmoothScroll from "@/components/layout/smooth-scroll";
 import "./globals.css";
 
 const sora = Sora({
@@ -33,7 +34,9 @@ export default function RootLayout({
       lang="en"
       className={`${sora.variable} ${geistMono.variable} ${akayaKanadaka.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        <SmoothScroll>{children}</SmoothScroll>
+      </body>
     </html>
   );
 }

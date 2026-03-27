@@ -9,6 +9,28 @@ export default function Header() {
     const [textColor, setTextColor] = useState("text-white");
 
     useEffect(() => {
+        if (!isOpen) {
+            return;
+        }
+
+        const originalOverflow = document.body.style.overflow;
+        document.body.style.overflow = "hidden";
+
+        const onKeyDown = (event: KeyboardEvent) => {
+            if (event.key === "Escape") {
+                setIsOpen(false);
+            }
+        };
+
+        window.addEventListener("keydown", onKeyDown);
+
+        return () => {
+            document.body.style.overflow = originalOverflow;
+            window.removeEventListener("keydown", onKeyDown);
+        };
+    }, [isOpen]);
+
+    useEffect(() => {
         const handleScroll = () => {
             const scrollPosition = window.scrollY;
             const heroHeight = window.innerHeight;
@@ -90,51 +112,66 @@ export default function Header() {
                 <button
                     type="button"
                     onClick={() => setIsOpen(!isOpen)}
-                    className={`md:hidden cursor-pointer flex flex-col gap-2 justify-self-end items-end`}
+                    className="relative flex h-10 w-10 cursor-pointer flex-col items-end justify-center gap-1.5 justify-self-end md:hidden"
                     aria-label="Toggle navigation"
                     aria-expanded={isOpen}
                 >
-                    <span className={`block h-0.5 transition-all duration-500 ease-out ${isOpen ? "w-5 absolute rotate-45" : "w-6"} ${textColor === "text-white" ? "bg-white" : "bg-black"}`} />
-                    <span className={`block h-0.5 transition-all duration-500 ease-out ${isOpen ? "w-5 absolute -rotate-45" : "w-4"} ${textColor === "text-white" ? "bg-white" : "bg-black"}`} />
-                    <span className={`block h-0.5 transition-all duration-500 ease-out ${isOpen ? "opacity-0" : "w-3"} ${textColor === "text-white" ? "bg-white" : "bg-black"}`} />
+                    <span
+                        className={`block h-0.5 transition-all duration-400 ease-out ${isOpen ? "w-6 translate-y-2 rotate-45" : "w-6"} ${textColor === "text-white" ? "bg-white" : "bg-black"}`}
+                    />
+                    <span
+                        className={`block h-0.5 transition-all duration-400 ease-out ${isOpen ? "w-6 -translate-y-0.5 -rotate-45" : "w-4"} ${textColor === "text-white" ? "bg-white" : "bg-black"}`}
+                    />
+                    <span
+                        className={`block h-0.5 transition-all duration-300 ease-out ${isOpen ? "w-0 opacity-0" : "w-3 opacity-100"} ${textColor === "text-white" ? "bg-white" : "bg-black"}`}
+                    />
                 </button>
             </div>
 
             {/* Mobile Navigation Drawer */}
             {isOpen && (
-                <nav
-                    className="md:hidden bg-white px-6 py-4 animate-in fade-in slide-in-from-top-2 duration-300"
-                    aria-label="Mobile navigation"
-                >
-                    <ul className="flex flex-col gap-4 border-t border-gray-200 pt-4">
-                        {navItems.map((item) => (
-                            <li key={item.label}>
+                <>
+                    <button
+                        type="button"
+                        className="fixed inset-0 z-40 bg-black/45 backdrop-blur-[2px] md:hidden"
+                        onClick={() => setIsOpen(false)}
+                        aria-label="Close mobile navigation"
+                    />
+
+                    <nav
+                        className="fixed inset-x-6 bottom-6 top-24 z-50 overflow-y-auto rounded-2xl bg-white px-8 py-6 shadow-[0_20px_60px_rgba(0,0,0,0.35)] animate-in fade-in slide-in-from-top-2 duration-300 md:hidden"
+                        aria-label="Mobile navigation"
+                    >
+                        <ul className="flex flex-col gap-5 border-t border-gray-200 pt-6">
+                            {navItems.map((item) => (
+                                <li key={item.label}>
+                                    <Link
+                                        href={item.href}
+                                        onClick={() => setIsOpen(false)}
+                                        className="group relative block text-4xl font-medium text-black transition-colors duration-200 hover:text-gray-700"
+                                    >
+                                        <span>{item.label}</span>
+                                        <span
+                                            aria-hidden="true"
+                                            className="absolute -bottom-1 left-0 h-0.5 w-full origin-left scale-x-0 bg-black transition-transform duration-300 ease-out group-hover:scale-x-100"
+                                        />
+                                    </Link>
+                                </li>
+                            ))}
+                            <li className="border-t border-gray-200 pt-6">
                                 <Link
-                                    href={item.href}
+                                    href="/login"
                                     onClick={() => setIsOpen(false)}
-                                    className="group relative block text-lg text-black transition-colors duration-200 hover:text-gray-600"
+                                    className="group relative block w-full rounded-full border-2 border-transparent p-1 text-center transition-colors duration-300 hover:border-black"
                                 >
-                                    <span>{item.label}</span>
-                                    <span
-                                        aria-hidden="true"
-                                        className="absolute bottom-0 left-0 h-0.5 w-full origin-left scale-x-0 transition-transform duration-300 ease-out group-hover:scale-x-100 bg-black"
-                                    />
+                                    <span className="block rounded-full bg-orange-500 px-6 py-3 text-xl font-semibold text-white transition-colors duration-300 ease-out group-hover:bg-black">
+                                        Login
+                                    </span>
                                 </Link>
                             </li>
-                        ))}
-                        <li className="border-t border-gray-200 pt-4">
-                            <Link
-                                href="/login"
-                                onClick={() => setIsOpen(false)}
-                                className="group relative block w-full rounded-full border-2 border-transparent p-1 text-center transition-colors duration-300 hover:border-black"
-                            >
-                                <span className="block rounded-full bg-orange-500 px-6 py-3 text-base font-semibold text-white transition-colors duration-300 ease-out group-hover:bg-black">
-                                    Login
-                                </span>
-                            </Link>
-                        </li>
-                    </ul>
-                </nav>
+                        </ul>
+                    </nav>
+                </>
             )}
         </header>
     );
