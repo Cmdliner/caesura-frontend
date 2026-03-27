@@ -1,5 +1,5 @@
 import Hero from "@/components/home/hero";
-import Header from "@/components/layout/header";
+import Header from "@/components/home/header";
 import Features from "@/components/home/features";
 import Trending from "@/components/home/trending";
 import Stats from "@/components/home/stats";

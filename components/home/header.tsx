@@ -1,23 +1,60 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import { useState, useEffect } from "react";
+
 export default function Header() {
     const [isOpen, setIsOpen] = useState(false);
+    const [bgColor, setBgColor] = useState("transparent");
+    const [textColor, setTextColor] = useState("text-white");
 
     useEffect(() => {
-        if (!isOpen) return;
+        if (!isOpen) {
+            return;
+        }
+
         const originalOverflow = document.body.style.overflow;
         document.body.style.overflow = "hidden";
+
         const onKeyDown = (event: KeyboardEvent) => {
-            if (event.key === "Escape") setIsOpen(false);
+            if (event.key === "Escape") {
+                setIsOpen(false);
+            }
         };
+
         window.addEventListener("keydown", onKeyDown);
+
         return () => {
             document.body.style.overflow = originalOverflow;
             window.removeEventListener("keydown", onKeyDown);
         };
     }, [isOpen]);
+
+    useEffect(() => {
+        const handleScroll = () => {
+            const scrollPosition = window.scrollY;
+            const heroHeight = window.innerHeight;
+            
+            // Calculate transition: 0 to 1 as you scroll from hero start to end
+            const transitionProgress = Math.min(scrollPosition / (heroHeight * 0.5), 1);
+            
+            // Determine if we're transitioning
+            if (scrollPosition < heroHeight * 1.5) {
+                // During transition (0% to 150% of hero height)
+                const opacity = transitionProgress;
+                setBgColor(`rgba(255, 255, 255, ${opacity})`);
+                // Smoothly transition text color: white to black
+                setTextColor(transitionProgress > 0.5 ? "text-black" : "text-white");
+            } else {
+                // Past hero, solid white
+                setBgColor("rgba(255, 255, 255, 1)");
+                setTextColor("text-black");
+            }
+        };
+
+        window.addEventListener("scroll", handleScroll);
+        return () => window.removeEventListener("scroll", handleScroll);
+    }, []);
 
     const navItems = [
         { label: "Discover", href: "/discover" },
@@ -28,7 +65,10 @@ export default function Header() {
     ];
 
     return (
-        <header className="fixed top-0 left-0 right-0 z-50 px-6 py-3 md:px-24 bg-white text-black border-b border-zinc-200">
+        <header 
+            className={`fixed top-0 left-0 right-0 z-50 px-6 py-6 md:px-24 transition-colors duration-150 ${textColor}`}
+            style={{ backgroundColor: bgColor }}
+        >
             <div className="mx-auto grid w-full max-w-7xl grid-cols-[auto_1fr_auto] items-center gap-4">
                 <Link href="/" className="text-5xl leading-none font-black font-brand" aria-label="Caesura Home">
                     Caesura
@@ -41,12 +81,12 @@ export default function Header() {
                             <li key={item.label}>
                                 <Link
                                     href={item.href}
-                                    className="group relative block pb-1 text-base transition-colors duration-150 text-black"
+                                    className={`group relative block pb-1 text-base transition-colors duration-150 ${textColor}`}
                                 >
                                     <span>{item.label}</span>
                                     <span
                                         aria-hidden="true"
-                                        className="absolute bottom-0 left-0 h-0.5 w-full origin-left scale-x-0 transition-transform duration-300 ease-out group-hover:scale-x-100 bg-black"
+                                        className={`absolute bottom-0 left-0 h-0.5 w-full origin-left scale-x-0 transition-transform duration-300 ease-out group-hover:scale-x-100 ${textColor === "text-white" ? "bg-white" : "bg-black"}`}
                                     />
                                 </Link>
                             </li>
@@ -77,13 +117,13 @@ export default function Header() {
                     aria-expanded={isOpen}
                 >
                     <span
-                        className={`block h-0.5 transition-all duration-400 ease-out ${isOpen ? "w-6 translate-y-2 rotate-45" : "w-6"} bg-black`}
+                        className={`block h-0.5 transition-all duration-400 ease-out ${isOpen ? "w-6 translate-y-2 rotate-45" : "w-6"} ${textColor === "text-white" ? "bg-white" : "bg-black"}`}
                     />
                     <span
-                        className={`block h-0.5 transition-all duration-400 ease-out ${isOpen ? "w-6 -translate-y-0.5 -rotate-45" : "w-4"} bg-black`}
+                        className={`block h-0.5 transition-all duration-400 ease-out ${isOpen ? "w-6 -translate-y-0.5 -rotate-45" : "w-4"} ${textColor === "text-white" ? "bg-white" : "bg-black"}`}
                     />
                     <span
-                        className={`block h-0.5 transition-all duration-300 ease-out ${isOpen ? "w-0 opacity-0" : "w-3 opacity-100"} bg-black`}
+                        className={`block h-0.5 transition-all duration-300 ease-out ${isOpen ? "w-0 opacity-0" : "w-3 opacity-100"} ${textColor === "text-white" ? "bg-white" : "bg-black"}`}
                     />
                 </button>
             </div>
