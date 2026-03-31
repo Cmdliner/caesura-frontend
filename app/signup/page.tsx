@@ -122,7 +122,7 @@ export default function SignUp() {
                   </Drawer.Trigger>
                   <Drawer.Portal>
                     <Drawer.Overlay className="fixed inset-0 z-60 bg-black/30" />
-                    <Drawer.Content className="fixed bottom-0 left-0 right-0 z-70 mx-auto max-h-[90dvh] w-full max-w-2xl overflow-y-auto rounded-t-3xl bg-white p-4 pb-[max(1.5rem,env(safe-area-inset-bottom))] shadow-2xl outline-none sm:p-6">
+                    <Drawer.Content className="fixed bottom-0 left-0 right-0 z-70 mx-auto max-h-[100dvh] w-full max-w-2xl overflow-y-visible rounded-t-3xl bg-white p-4 pb-[max(1.5rem,env(safe-area-inset-bottom))] shadow-2xl outline-none sm:p-6">
                       <div className="mx-auto mb-4 h-1.5 w-14 rounded-full bg-zinc-300" />
                       <Drawer.Title className="text-xl font-bold text-zinc-950 sm:text-2xl">Profile details</Drawer.Title>
                       <Drawer.Description className="mb-5 mt-1 text-sm text-zinc-500">
@@ -185,7 +185,7 @@ export default function SignUp() {
                   </Drawer.Trigger>
                   <Drawer.Portal>
                     <Drawer.Overlay className="fixed inset-0 z-60 bg-black/30" />
-                    <Drawer.Content className="fixed bottom-0 left-0 right-0 z-70 mx-auto max-h-[90dvh] w-full max-w-2xl overflow-y-auto rounded-t-3xl bg-white p-4 pb-[max(1.5rem,env(safe-area-inset-bottom))] shadow-2xl outline-none sm:p-6">
+                    <Drawer.Content className="fixed bottom-0 left-0 right-0 z-70 mx-auto max-h-[100dvh] w-full max-w-2xl overflow-y-visible rounded-t-3xl bg-white p-4 pb-[max(1.5rem,env(safe-area-inset-bottom))] shadow-2xl outline-none sm:p-6">
                       <div className="mx-auto mb-4 h-1.5 w-14 rounded-full bg-zinc-300" />
                       <Drawer.Title className="text-xl font-bold text-zinc-950 sm:text-2xl">Set password</Drawer.Title>
                       <Drawer.Description className="mb-5 mt-1 text-sm text-zinc-500">

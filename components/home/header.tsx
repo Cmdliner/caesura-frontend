@@ -66,11 +66,11 @@ export default function Header() {
 
     return (
         <header 
-            className={`fixed top-0 left-0 right-0 z-50 px-6 py-6 md:px-24 transition-colors duration-150 ${textColor}`}
+            className={`fixed top-0 left-0 right-0 z-50 px-6 py-4 md:px-24 transition-colors duration-150 ${textColor}`}
             style={{ backgroundColor: bgColor }}
         >
             <div className="mx-auto grid w-full max-w-7xl grid-cols-[auto_1fr_auto] items-center gap-4">
-                <Link href="/" className="text-5xl leading-none font-black font-brand" aria-label="Caesura Home">
+                <Link href="/" className="text-3xl leading-none font-black font-brand" aria-label="Caesura Home">
                     Caesura
                 </Link>
 
