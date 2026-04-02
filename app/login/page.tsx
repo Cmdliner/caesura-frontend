@@ -1,10 +1,49 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
+import { useAuthMutation } from "@/lib/api/queries";
+import { useAuth } from "@/app/providers/auth-provider";
+import { getErrorMessage } from "@/lib/utils";
 
 export default function Login() {
+  const router = useRouter();
+  const { isAuthenticated, setUser } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+
+  const { mutate: login, isPending } = useAuthMutation.useLogin({
+    onSuccess: (data) => {
+      setUser(data.user);
+      setError("");
+      router.push("/library");
+    },
+    onError: (error) => {
+      setError(getErrorMessage(error));
+    },
+  });
+
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      router.push("/library");
+    }
+  }, [isAuthenticated, router]);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+
+    if (!email || !password) {
+      setError("Please fill in all fields");
+      return;
+    }
+
+    login({ email, password });
+  };
 
   return (
     <section className="relative min-h-[100dvh] overflow-x-hidden bg-[#f6f8fc] px-4 pb-[max(1.5rem,env(safe-area-inset-bottom))] pt-[max(1.5rem,env(safe-area-inset-top))] sm:px-6 sm:py-12 sm:pb-12">
@@ -79,7 +118,13 @@ export default function Login() {
             Enter your email to continue to your library and drafts.
           </p>
 
-          <form className="space-y-4 sm:space-y-5">
+          {error && (
+            <div className="mb-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700 border border-red-200">
+              {error}
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
             <div>
               <label htmlFor="email" className="mb-2 block text-sm font-medium text-zinc-700">
                 Email
@@ -89,7 +134,10 @@ export default function Login() {
                 type="email"
                 autoComplete="email"
                 placeholder="you@example.com"
-                className="min-h-11 w-full rounded-xl border border-zinc-200 bg-white px-4 py-3 text-base text-zinc-900 shadow-sm placeholder:text-zinc-400 outline-none ring-0 transition-[border-color,box-shadow] duration-200 focus:border-orange-400 focus:shadow-[0_0_0_3px_rgba(251,146,60,0.15)] sm:min-h-0 sm:text-[15px]"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                disabled={isPending}
+                className="min-h-11 w-full rounded-xl border border-zinc-200 bg-white px-4 py-3 text-base text-zinc-900 shadow-sm placeholder:text-zinc-400 outline-none ring-0 transition-[border-color,box-shadow] duration-200 focus:border-orange-400 focus:shadow-[0_0_0_3px_rgba(251,146,60,0.15)] disabled:opacity-50 disabled:cursor-not-allowed sm:min-h-0 sm:text-[15px]"
               />
             </div>
 
@@ -100,7 +148,8 @@ export default function Login() {
                 </label>
                 <button
                   type="button"
-                  className="w-fit text-left text-xs font-medium text-orange-600 transition-colors hover:text-orange-700 sm:text-xs"
+                  className="w-fit text-left text-xs font-medium text-orange-600 transition-colors hover:text-orange-700 sm:text-xs disabled:opacity-50 disabled:cursor-not-allowed"
+                  disabled={isPending}
                 >
                   Forgot password?
                 </button>
@@ -111,18 +160,22 @@ export default function Login() {
                   type={showPassword ? "text" : "password"}
                   autoComplete="current-password"
                   placeholder="••••••••"
-                  className="min-h-11 w-full rounded-xl border border-zinc-200 bg-white px-4 py-3 pr-12 text-base text-zinc-900 shadow-sm placeholder:text-zinc-400 outline-none ring-0 transition-[border-color,box-shadow] duration-200 focus:border-orange-400 focus:shadow-[0_0_0_3px_rgba(251,146,60,0.15)] sm:min-h-0 sm:text-[15px]"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  disabled={isPending}
+                  className="min-h-11 w-full rounded-xl border border-zinc-200 bg-white px-4 py-3 pr-12 text-base text-zinc-900 shadow-sm placeholder:text-zinc-400 outline-none ring-0 transition-[border-color,box-shadow] duration-200 focus:border-orange-400 focus:shadow-[0_0_0_3px_rgba(251,146,60,0.15)] disabled:opacity-50 disabled:cursor-not-allowed sm:min-h-0 sm:text-[15px]"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword((prev) => !prev)}
                   aria-label={showPassword ? "Hide password" : "Show password"}
-                  className="absolute inset-y-0 right-0 flex min-h-11 min-w-11 items-center justify-center text-zinc-400 transition-colors hover:text-zinc-700 sm:min-h-0 sm:min-w-12"
+                  className="absolute inset-y-0 right-0 flex min-h-11 min-w-11 items-center justify-center text-zinc-400 transition-colors hover:text-zinc-700 disabled:opacity-50 disabled:cursor-not-allowed sm:min-h-0 sm:min-w-12"
+                  disabled={isPending}
                 >
                   {showPassword ? (
                     <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5" aria-hidden="true">
                       <path
-                        d="M3 3l18 18M10.58 10.58a2 2 0 102.83 2.83M9.88 5.09A10.94 10.94 0 0112 5c5 0 9.27 3.11 11 7-1 2.24-2.74 4.12-4.96 5.3M6.61 6.61C4.62 7.9 3.1 9.77 2 12c.63 1.45 1.57 2.78 2.73 3.89A10.94 10.94 0 0012 19c1.85 0 3.6-.46 5.12-1.27"
+                        d="M3 3l18 18M10.58 10.58a2 2 0 102.83 2.83M9.88 5.09A10.94 10.94 0 0112 5c5 0 9.27 3.11 11 7-1 2.24-2.74 4.12-4.96 5.3M6.61 6.61C4.62 7.9 3.1 9.77 2 12c.63 1.45 1.57 2.78 2.73 3.89A10.94 10.94 0 0112 19c1.85 0 3.6-.46 5.12-1.27"
                         stroke="currentColor"
                         strokeWidth="1.8"
                         strokeLinecap="round"
@@ -147,9 +200,10 @@ export default function Login() {
 
             <button
               type="submit"
-              className="mt-1 min-h-12 w-full rounded-xl bg-zinc-900 px-6 py-3.5 text-base font-semibold text-white shadow-sm transition-colors duration-200 hover:bg-orange-500 sm:text-[15px]"
+              disabled={isPending}
+              className="mt-1 min-h-12 w-full rounded-xl bg-zinc-900 px-6 py-3.5 text-base font-semibold text-white shadow-sm transition-colors duration-200 hover:bg-orange-500 disabled:opacity-60 disabled:cursor-not-allowed sm:text-[15px]"
             >
-              Continue
+              {isPending ? "Signing in..." : "Continue"}
             </button>
           </form>
 
@@ -161,7 +215,8 @@ export default function Login() {
 
           <button
             type="button"
-            className="inline-flex min-h-12 w-full items-center justify-center gap-3 rounded-xl border border-zinc-200 bg-white px-4 py-3 text-sm font-semibold text-zinc-800 shadow-sm transition-colors hover:border-zinc-300 hover:bg-zinc-50"
+            disabled={isPending}
+            className="inline-flex min-h-12 w-full items-center justify-center gap-3 rounded-xl border border-zinc-200 bg-white px-4 py-3 text-sm font-semibold text-zinc-800 shadow-sm transition-colors hover:border-zinc-300 hover:bg-zinc-50 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <svg className="h-5 w-5 shrink-0" viewBox="0 0 24 24" aria-hidden="true">
               <path

@@ -1,9 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useQuery } from "@tanstack/react-query";
 import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
+import { storiesAPI } from "@/lib/api/stories";
+import { tokenManager, userManager } from "@/lib/utils";
 
 const tabs = [
   { id: "overview", label: "Overview" },
@@ -14,7 +18,63 @@ const tabs = [
 type TabId = (typeof tabs)[number]["id"];
 
 export default function ProfilePage() {
+  const router = useRouter();
+  const [mounted, setMounted] = useState(false);
+  const [currentUser, setCurrentUser] = useState<API.User | null>(null);
   const [activeTab, setActiveTab] = useState<TabId>("overview");
+
+  // Check auth and load current user from localStorage
+  useEffect(() => {
+    setMounted(true);
+    if (!tokenManager.hasToken()) {
+      router.push("/login");
+    } else {
+      const user = userManager.getUser();
+      setCurrentUser(user);
+    }
+  }, [router]);
+
+  // Fetch user stories
+  const { data: stories = [], isLoading: storiesLoading } = useQuery({
+    queryKey: ['user-stories'],
+    queryFn: () => storiesAPI.getUserStories(),
+    enabled: mounted && tokenManager.hasToken(),
+  });
+
+  // Generate initials from display name or username
+  const getInitials = (displayName?: string, username?: string) => {
+    const name = displayName || username || "?";
+    return name
+      .split(" ")
+      .slice(0, 2)
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase();
+  };
+
+  if (!mounted || !currentUser) {
+    return (
+      <>
+        <Header />
+        <main className="relative min-h-screen overflow-x-hidden bg-[#f6f8fc] pb-16 pt-[4.5rem] sm:pt-24 flex items-center justify-center">
+          <div className="text-center">
+            <div className="inline-flex h-12 w-12 animate-spin rounded-full border-4 border-zinc-200 border-t-orange-500" />
+            <p className="mt-4 text-zinc-600">Loading profile...</p>
+          </div>
+        </main>
+        <Footer />
+      </>
+    );
+  }
+
+  const profile = currentUser;
+
+  // Compute stats from available data
+  const profileStats = {
+    stories_count: stories.length,
+    total_reads: 0,
+    follower_count: 0,
+  };
 
   return (
     <>
@@ -42,23 +102,34 @@ export default function ProfilePage() {
 
           <div className="flex flex-col items-center gap-6 sm:flex-row sm:items-end sm:gap-8">
             <div className="-mt-12 flex shrink-0 flex-col items-center sm:-mt-16 sm:items-start">
-              <div
-                className="flex h-28 w-28 items-center justify-center rounded-full border-4 border-white bg-linear-to-br from-orange-400 to-orange-600 text-3xl font-bold text-white shadow-lg ring-1 ring-black/5 sm:h-32 sm:w-32 sm:text-4xl"
-                aria-hidden="true"
-              >
-                AR
-              </div>
+              {profile.avatar_url ? (
+                <img
+                  src={profile.avatar_url}
+                  alt={profile.display_name || profile.username}
+                  className="flex h-28 w-28 items-center justify-center rounded-full border-4 border-white object-cover shadow-lg ring-1 ring-black/5 sm:h-32 sm:w-32"
+                />
+              ) : (
+                <div
+                  className="flex h-28 w-28 items-center justify-center rounded-full border-4 border-white bg-linear-to-br from-orange-400 to-orange-600 text-3xl font-bold text-white shadow-lg ring-1 ring-black/5 sm:h-32 sm:w-32 sm:text-4xl"
+                  aria-hidden="true"
+                >
+                  {getInitials(profile.display_name, profile.username)}
+                </div>
+              )}
             </div>
 
             <div className="w-full min-w-0 flex-1 text-center sm:pb-2 sm:text-left">
               <div className="flex flex-col items-center gap-1 sm:items-start">
-                <h1 className="text-2xl font-extrabold tracking-tight text-zinc-900 sm:text-3xl">Alex Rivera</h1>
-                <p className="text-sm font-medium text-orange-600">@alexwrites</p>
+                <h1 className="text-2xl font-extrabold tracking-tight text-zinc-900 sm:text-3xl">
+                  {profile.display_name || profile.username}
+                </h1>
+                <p className="text-sm font-medium text-orange-600">@{profile.username}</p>
               </div>
-              <p className="mx-auto mt-3 max-w-xl text-sm leading-relaxed text-zinc-600 sm:mx-0">
-                Fantasy &amp; literary fiction. I write about impossible libraries and the people who find them. Coffee,
-                plot twists, and long walks between chapters.
-              </p>
+              {profile.bio && (
+                <p className="mx-auto mt-3 max-w-xl text-sm leading-relaxed text-zinc-600 sm:mx-0">
+                  {profile.bio}
+                </p>
+              )}
               <div className="mt-4 flex flex-wrap items-center justify-center gap-2 sm:justify-start">
                 <button
                   type="button"
@@ -78,16 +149,28 @@ export default function ProfilePage() {
 
           <div className="mt-8 grid grid-cols-3 gap-2 rounded-2xl border border-zinc-200/80 bg-white/90 p-4 shadow-sm backdrop-blur-sm sm:gap-4 sm:p-5">
             <div className="text-center">
-              <p className="text-lg font-bold tabular-nums text-zinc-900 sm:text-2xl">12</p>
-              <p className="text-[11px] font-medium uppercase tracking-wide text-zinc-500 sm:text-xs">Stories</p>
+              <p className="text-lg font-bold tabular-nums text-zinc-900 sm:text-2xl">
+                {profileStats.stories_count}
+              </p>
+              <p className="text-[11px] font-medium uppercase tracking-wide text-zinc-500 sm:text-xs">
+                Stories
+              </p>
             </div>
             <div className="border-x border-zinc-100 text-center">
-              <p className="text-lg font-bold tabular-nums text-zinc-900 sm:text-2xl">2.4k</p>
-              <p className="text-[11px] font-medium uppercase tracking-wide text-zinc-500 sm:text-xs">Reads</p>
+              <p className="text-lg font-bold tabular-nums text-zinc-900 sm:text-2xl">
+                {profileStats.total_reads}
+              </p>
+              <p className="text-[11px] font-medium uppercase tracking-wide text-zinc-500 sm:text-xs">
+                Reads
+              </p>
             </div>
             <div className="text-center">
-              <p className="text-lg font-bold tabular-nums text-zinc-900 sm:text-2xl">892</p>
-              <p className="text-[11px] font-medium uppercase tracking-wide text-zinc-500 sm:text-xs">Followers</p>
+              <p className="text-lg font-bold tabular-nums text-zinc-900 sm:text-2xl">
+                {profileStats.follower_count}
+              </p>
+              <p className="text-[11px] font-medium uppercase tracking-wide text-zinc-500 sm:text-xs">
+                Followers
+              </p>
             </div>
           </div>
 
@@ -140,7 +223,9 @@ export default function ProfilePage() {
                   href="/library"
                   className="group rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm transition-all hover:border-orange-200 hover:shadow-md"
                 >
-                  <p className="text-xs font-semibold uppercase tracking-wide text-orange-500">Library</p>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-orange-500">
+                    Library
+                  </p>
                   <p className="mt-2 font-semibold text-zinc-900">Continue reading</p>
                   <p className="mt-1 text-sm text-zinc-500">Pick up where you left off.</p>
                   <span className="mt-3 inline-block text-sm font-semibold text-orange-600 group-hover:underline">
@@ -151,7 +236,9 @@ export default function ProfilePage() {
                   href="/create-story"
                   className="group rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm transition-all hover:border-orange-200 hover:shadow-md"
                 >
-                  <p className="text-xs font-semibold uppercase tracking-wide text-orange-500">Write</p>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-orange-500">
+                    Write
+                  </p>
                   <p className="mt-2 font-semibold text-zinc-900">Start a new draft</p>
                   <p className="mt-1 text-sm text-zinc-500">Blank page, full possibility.</p>
                   <span className="mt-3 inline-block text-sm font-semibold text-orange-600 group-hover:underline">
@@ -159,9 +246,12 @@ export default function ProfilePage() {
                   </span>
                 </Link>
                 <div className="rounded-2xl border border-dashed border-zinc-200 bg-white/60 p-5 sm:col-span-2 lg:col-span-1">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-zinc-400">Activity</p>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-zinc-400">
+                    Activity
+                  </p>
                   <p className="mt-2 text-sm text-zinc-600">
-                    Recent likes, comments, and milestones will show here once you&apos;re active on Caesura.
+                    Recent likes, comments, and milestones will show here once you&apos;re active on
+                    Caesura.
                   </p>
                 </div>
               </div>
@@ -181,29 +271,45 @@ export default function ProfilePage() {
                     New story
                   </Link>
                 </div>
-                <ul className="mt-6 divide-y divide-zinc-100">
-                  {[
-                    { title: "The Midnight Shelf", status: "Published", reads: "1.2k" },
-                    { title: "Letters Never Sent", status: "Draft", reads: "—" },
-                    { title: "Winter in the Stacks", status: "Draft", reads: "—" },
-                  ].map((story) => (
-                    <li key={story.title} className="flex flex-col gap-2 py-4 first:pt-0 sm:flex-row sm:items-center sm:justify-between">
-                      <div>
-                        <p className="font-medium text-zinc-900">{story.title}</p>
-                        <p className="text-xs text-zinc-500">
-                          {story.status}
-                          {story.reads !== "—" && ` · ${story.reads} reads`}
-                        </p>
-                      </div>
-                      <button
-                        type="button"
-                        className="w-fit text-sm font-semibold text-orange-600 hover:underline"
+
+                {storiesLoading ? (
+                  <div className="mt-6 flex justify-center py-8">
+                    <div className="inline-flex h-10 w-10 animate-spin rounded-full border-4 border-zinc-200 border-t-orange-500" />
+                  </div>
+                ) : stories.length === 0 ? (
+                  <div className="mt-6 rounded-lg border border-dashed border-zinc-200 p-8 text-center">
+                    <p className="text-zinc-600">No stories yet.</p>
+                    <Link
+                      href="/create-story"
+                      className="mt-2 inline-block text-sm font-semibold text-orange-600 hover:underline"
+                    >
+                      Start writing →
+                    </Link>
+                  </div>
+                ) : (
+                  <ul className="mt-6 divide-y divide-zinc-100">
+                    {stories.map((story) => (
+                      <li
+                        key={story.id}
+                        className="flex flex-col gap-2 py-4 first:pt-0 sm:flex-row sm:items-center sm:justify-between"
                       >
-                        Open
-                      </button>
-                    </li>
-                  ))}
-                </ul>
+                        <div>
+                          <p className="font-medium text-zinc-900">{story.title}</p>
+                          <p className="text-xs text-zinc-500">
+                            {story.status === "published" ? "Published" : "Draft"}
+                            {story.views_count > 0 && ` · ${story.views_count} views`}
+                          </p>
+                        </div>
+                        <button
+                          type="button"
+                          className="w-fit text-sm font-semibold text-orange-600 hover:underline"
+                        >
+                          Open
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </div>
             )}
 
@@ -211,25 +317,14 @@ export default function ProfilePage() {
               <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
                 <h2 className="text-lg font-bold text-zinc-900">Reading list</h2>
                 <p className="mt-1 text-sm text-zinc-500">Stories you&apos;ve saved for later.</p>
-                <div className="mt-6 grid gap-3 sm:grid-cols-2">
-                  {["The Last Archive", "Salt & Starlight", "Paper Boats"].map((title) => (
-                    <div
-                      key={title}
-                      className="flex items-center justify-between gap-3 rounded-xl border border-zinc-100 bg-zinc-50/80 px-4 py-3"
-                    >
-                      <span className="min-w-0 truncate text-sm font-medium text-zinc-800">{title}</span>
-                      <button type="button" className="shrink-0 text-xs font-semibold text-orange-600 hover:underline">
-                        Read
-                      </button>
-                    </div>
-                  ))}
+                <div className="mt-6">
+                  <Link
+                    href="/library"
+                    className="inline-block text-sm font-semibold text-orange-600 hover:underline"
+                  >
+                    View your library →
+                  </Link>
                 </div>
-                <Link
-                  href="/library"
-                  className="mt-6 inline-flex text-sm font-semibold text-orange-600 hover:underline"
-                >
-                  View full library →
-                </Link>
               </div>
             )}
           </div>
