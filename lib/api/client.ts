@@ -18,10 +18,9 @@ class APIClient {
       headers: {
         'Content-Type': 'application/json',
       },
-      withCredentials: true, // Allow credentials in cross-origin requests
+      withCredentials: true, 
     });
 
-    // Request interceptor to add auth token
     this.client.interceptors.request.use(
       (config: InternalAxiosRequestConfig) => {
         const token = tokenManager.getToken();
@@ -33,7 +32,6 @@ class APIClient {
       (error) => Promise.reject(error)
     );
 
-    // Response interceptor to handle errors
     this.client.interceptors.response.use(
       (response) => response,
       (error: AxiosError) => {

@@ -1,8 +1,6 @@
 import { STORAGE_KEYS } from './constants';
 
-/**
- * Token Management Utilities
- */
+
 export const tokenManager = {
   setToken: (token: string) => {
     if (typeof window !== 'undefined') {
@@ -28,9 +26,6 @@ export const tokenManager = {
   },
 };
 
-/**
- * User Management Utilities
- */
 export const userManager = {
   setUser: (user: API.User) => {
     if (typeof window !== 'undefined') {
@@ -57,9 +52,6 @@ export const userManager = {
   },
 };
 
-/**
- * Reading Progress Utilities
- */
 export const progressManager = {
   setProgress: (bookId: string, chapterId: string, scrollPosition: number) => {
     if (typeof window !== 'undefined') {
@@ -104,9 +96,6 @@ export const progressManager = {
   },
 };
 
-/**
- * Auth Utilities
- */
 export const clearAuth = () => {
   tokenManager.removeToken();
   userManager.removeUser();
@@ -117,9 +106,6 @@ export const setAuth = (response: API.AuthResponse) => {
   userManager.setUser(response.user);
 };
 
-/**
- * Error Handling
- */
 export const isErrorResponse = (error: unknown): error is { message: string; status?: number } => {
   return typeof error === 'object' && error !== null && 'message' in error;
 };
@@ -134,9 +120,6 @@ export const getErrorMessage = (error: unknown): string => {
   return 'An unknown error occurred';
 };
 
-/**
- * Time Formatting
- */
 export const formatLastRead = (date: string): string => {
   const parsed = new Date(date);
   const now = new Date();
@@ -156,17 +139,12 @@ export const formatLastRead = (date: string): string => {
   return parsed.toLocaleDateString();
 };
 
-/**
- * Text Truncation
- */
+
 export const truncateText = (text: string, maxLength: number): string => {
   if (text.length <= maxLength) return text;
   return text.slice(0, maxLength) + '...';
 };
 
-/**
- * Slug Generation
- */
 export const generateSlug = (text: string): string => {
   return text
     .toLowerCase()

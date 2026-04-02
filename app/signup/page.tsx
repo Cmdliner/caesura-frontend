@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { Drawer } from "vaul";
+import { useAuthMutation } from "@/lib/api/queries";
 
 export default function SignUp() {
   const [showPassword, setShowPassword] = useState(false);
@@ -12,6 +13,9 @@ export default function SignUp() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [formError, setFormError] = useState<string | null>(null);
+  const [formSuccess, setFormSuccess] = useState<string | null>(null);
+  const registerMutation = useAuthMutation.useRegister();
 
   return (
     <section className="relative min-h-[100dvh] overflow-x-hidden bg-[#f6f8fc] px-4 pb-[max(1.5rem,env(safe-area-inset-bottom))] pt-[max(1.5rem,env(safe-area-inset-top))] sm:px-6 sm:py-12 sm:pb-12">
@@ -89,7 +93,32 @@ export default function SignUp() {
               Open your account
             </h2>
 
-            <form className="space-y-4">
+            <form
+              className="space-y-4"
+              onSubmit={async (e) => {
+                e.preventDefault();
+                setFormError(null);
+                setFormSuccess(null);
+                if (!email || !username || !password || !confirmPassword) {
+                  setFormError("Please fill in all fields.");
+                  return;
+                }
+                if (password !== confirmPassword) {
+                  setFormError("Passwords do not match.");
+                  return;
+                }
+                try {
+                  await registerMutation.mutateAsync({ email, username, password });
+                  setFormSuccess("Account created! Redirecting...");
+                  // Optionally redirect after a short delay
+                  setTimeout(() => {
+                    window.location.href = "/library";
+                  }, 1200);
+                } catch (err: any) {
+                  setFormError(err?.message || "Registration failed. Please try again.");
+                }
+              }}
+            >
               <div>
                 <label htmlFor="email" className="mb-2 block text-sm font-medium text-black/80">
                   Email address
@@ -304,11 +333,22 @@ export default function SignUp() {
                 </span>
               </label>
 
+              {formError && (
+                <div className="rounded-xl bg-red-50 border border-red-200 text-red-700 px-4 py-2 text-sm mb-2">
+                  {formError}
+                </div>
+              )}
+              {formSuccess && (
+                <div className="rounded-xl bg-green-50 border border-green-200 text-green-700 px-4 py-2 text-sm mb-2">
+                  {formSuccess}
+                </div>
+              )}
               <button
                 type="submit"
-                className="min-h-12 w-full rounded-xl bg-black px-6 py-3 text-base font-semibold text-white transition-colors duration-300 hover:bg-orange-500"
+                className="min-h-12 w-full rounded-xl bg-black px-6 py-3 text-base font-semibold text-white transition-colors duration-300 hover:bg-orange-500 disabled:opacity-60"
+                disabled={registerMutation.isPending}
               >
-                Create account
+                {registerMutation.isPending ? "Creating..." : "Create account"}
               </button>
             </form>
 
