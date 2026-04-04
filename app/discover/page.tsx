@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import Header from '@/components/layout/header';
+import BookCard from '@/components/books/book-card';
 import { useBookQueries } from '@/lib/api/queries';
 import { booksAPI } from '@/lib/api/books';
 import { useAuth } from '@/app/providers/auth-provider';
@@ -71,72 +72,22 @@ export default function DiscoverPage() {
           ) : (
             <>
               {/* Books Grid */}
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-5">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-7">
                 {booksData.items.map((book) => (
-                  <Link href={`/book/${book.slug}`} key={book.id}>
-                    <div className="group h-full flex flex-col rounded-lg overflow-hidden bg-white border border-zinc-200 shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-0.5">
-                      {/* Book Cover */}
-                      <div className="relative w-full bg-zinc-100 overflow-hidden" style={{ aspectRatio: '9/12' }}>
-                        {book.cover_url ? (
-                          <img
-                            src={book.cover_url}
-                            alt={book.title}
-                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                            loading="lazy"
-                          />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-orange-100 to-orange-50">
-                            <svg className="h-10 w-10 text-orange-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6.253v13m0-13C6.5 6.253 2 10.998 2 17s4.5 10.747 10 10.747c5.5 0 10-4.999 10-11.747S17.5 6.253 12 6.253z" />
-                            </svg>
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Book Info */}
-                      <div className="flex flex-col flex-1 p-3">
-                        <h3 className="font-semibold text-xs text-zinc-900 line-clamp-2 mb-1 leading-tight">
-                          {book.title}
-                        </h3>
-                        
-                        {/* Spacer */}
-                        <div className="flex-1" />
-
-                        {/* Footer */}
-                        <div className="space-y-2">
-                          {/* Stats */}
-                          <div className="flex items-center gap-1 text-[10px] text-zinc-500">
-                            <svg className="h-3 w-3" fill="currentColor" viewBox="0 0 20 20">
-                              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                            </svg>
-                            <span>{Math.round(book.total_views / 1000)}K</span>
-                          </div>
-
-                          {/* Add Button */}
-                          {isAuthenticated ? (
-                            <button
-                              onClick={(e) => handleAddToLibrary(book.id, e)}
-                              disabled={addingToLibrary === book.id}
-                              className={`w-full py-1.5 rounded text-[10px] font-semibold transition-all duration-200 ${
-                                addingToLibrary === book.id
-                                  ? 'bg-zinc-100 text-zinc-500 cursor-not-allowed'
-                                  : 'bg-orange-500 text-white hover:bg-orange-600 active:scale-95'
-                              }`}
-                            >
-                              {addingToLibrary === book.id ? 'Adding...' : '+ Add'}
-                            </button>
-                          ) : (
-                            <Link
-                              href="/login"
-                              className="block w-full py-1.5 rounded bg-zinc-100 text-[10px] font-semibold text-zinc-700 text-center hover:bg-zinc-200 transition-colors"
-                            >
-                              Sign in
-                            </Link>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  </Link>
+                  <BookCard
+                    key={book.id}
+                    id={book.id}
+                    slug={book.slug}
+                    title={book.title}
+                    description={book.description}
+                    cover_url={book.cover_url}
+                    total_views={book.total_views}
+                    variant="featured"
+                    isAuthenticated={isAuthenticated}
+                    author={book.authors?.length ? book.authors[0] : book.author_name || 'Unknown Author'}
+                    isAddingToLibrary={addingToLibrary === book.id}
+                    onAddToLibrary={(e) => handleAddToLibrary(book.id, e)}
+                  />
                 ))}
               </div>
 

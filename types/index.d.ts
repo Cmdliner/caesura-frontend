@@ -69,6 +69,8 @@ declare global {
       title: string;
       slug: string;
       description?: string;
+      author_name?: string;
+      authors?: string[];
       cover_url?: string;
       language: string;
       status: string;
