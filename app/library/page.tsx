@@ -72,19 +72,19 @@ export default function LibraryPage() {
           <div className="mx-auto max-w-[1200px] px-4 sm:px-6">
             {/* Title */}
             <div className="pt-8 pb-5 animate-fade-up">
-              <h1 className="text-3xl font-extrabold text-zinc-900 tracking-tight">Library</h1>
-              <p className="mt-1 text-[14px] text-zinc-500">
+              <h1 className="text-2xl sm:text-3xl font-extrabold text-zinc-900 tracking-tight">Library</h1>
+              <p className="mt-1 text-[12px] sm:text-[14px] text-zinc-500">
                 {books.length} {books.length === 1 ? "book" : "books"} saved
               </p>
             </div>
 
-            {/* Filter tabs (Wattpad-style underline) */}
-            <div className="flex items-center gap-0 -mb-px">
+            {/* Filter tabs (Wattpad-style underline) - scrollable on mobile */}
+            <div className="flex items-center gap-0 -mb-px overflow-x-auto scrollbar-hide">
               {filters.map((f) => (
                 <button
                   key={f.id}
                   onClick={() => setFilter(f.id)}
-                  className={`relative px-4 py-3 text-[13.5px] font-semibold transition-colors whitespace-nowrap ${
+                  className={`relative px-2 sm:px-4 py-3 text-[12px] sm:text-[13.5px] font-semibold transition-colors whitespace-nowrap flex-shrink-0 ${
                     filter === f.id
                       ? "text-zinc-900 border-b-[2.5px] border-orange-500"
                       : "text-zinc-500 hover:text-zinc-800 border-b-[2.5px] border-transparent"
@@ -264,30 +264,30 @@ export default function LibraryPage() {
         <Drawer.Root open={activeBook !== null} onOpenChange={(open) => !open && setActiveBook(null)}>
           <Drawer.Portal>
             <Drawer.Overlay className="fixed inset-0 z-60 bg-black/35" />
-            <Drawer.Content className="fixed bottom-0 left-0 right-0 z-70 mx-auto flex max-h-[80dvh] max-w-lg flex-col rounded-t-3xl bg-white">
-              <div className="mx-auto mt-3 h-1 w-12 rounded-full bg-zinc-200" />
+            <Drawer.Content className="fixed bottom-0 left-0 right-0 z-70 mx-auto flex max-h-[90dvh] w-full max-w-lg flex-col rounded-t-2xl sm:rounded-t-3xl bg-white">
+              <div className="mx-auto mt-2 sm:mt-3 h-1 w-10 sm:w-12 rounded-full bg-zinc-200" />
               {activeBook && (
-                <div className="flex flex-1 flex-col overflow-y-auto px-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] pt-4 sm:px-6">
-                  <div className="flex gap-4 mb-6">
+                <div className="flex flex-1 flex-col overflow-y-auto px-4 sm:px-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] pt-3 sm:pt-4">
+                  <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-4 sm:mb-6">
                     {activeBook.cover_url && (
                       <img
                         src={activeBook.cover_url}
                         alt=""
-                        className="h-32 w-24 flex-shrink-0 rounded-lg object-cover shadow"
+                        className="h-24 sm:h-32 w-16 sm:w-24 flex-shrink-0 rounded-lg object-cover shadow"
                       />
                     )}
                     <div className="flex-1">
-                      <Drawer.Title className="text-xl font-bold text-zinc-900">
+                      <Drawer.Title className="text-lg sm:text-xl font-bold text-zinc-900 line-clamp-2">
                         {activeBook.title}
                       </Drawer.Title>
-                      <div className="mt-2 inline-block px-2.5 py-1 rounded-full bg-zinc-100 text-xs font-semibold text-zinc-600 capitalize">
+                      <div className="mt-2 inline-block px-2.5 py-1 rounded-full bg-zinc-100 text-[11px] sm:text-xs font-semibold text-zinc-600 capitalize">
                         {activeBook.shelf}
                       </div>
                     </div>
                   </div>
 
                   {activeBook.progress && (
-                    <div className="mb-6 p-4 rounded-xl bg-zinc-50 border border-zinc-100">
+                    <div className="mb-4 sm:mb-6 p-3 sm:p-4 rounded-lg sm:rounded-xl bg-zinc-50 border border-zinc-100">
                       <div className="flex justify-between items-center mb-2">
                         <span className="text-sm font-semibold text-zinc-900">Reading Progress</span>
                         <span className="text-sm font-bold text-orange-500">{activeBook.progress.scroll_position}%</span>
@@ -299,17 +299,17 @@ export default function LibraryPage() {
                     </div>
                   )}
 
-                  <div className="flex gap-3 mt-auto">
+                  <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 mt-auto">
                     <Link
                       href={`/book/${activeBook.slug}`}
-                      className="flex-1 inline-flex items-center justify-center px-4 py-3 rounded-xl bg-zinc-900 text-white font-semibold hover:bg-orange-500 transition-colors text-sm"
+                      className="flex-1 inline-flex items-center justify-center px-4 py-2 sm:py-3 rounded-lg sm:rounded-xl bg-zinc-900 text-white font-semibold text-sm hover:bg-orange-500 transition-colors"
                     >
                       Continue Reading
                     </Link>
                     <Drawer.Close asChild>
                       <button
                         type="button"
-                        className="flex-1 inline-flex items-center justify-center px-4 py-3 rounded-xl border border-zinc-200 text-zinc-700 font-semibold hover:bg-zinc-50 transition-colors text-sm"
+                        className="flex-1 inline-flex items-center justify-center px-4 py-2 sm:py-3 rounded-lg sm:rounded-xl border border-zinc-200 text-zinc-700 font-semibold text-sm hover:bg-zinc-50 transition-colors"
                       >
                         Close
                       </button>

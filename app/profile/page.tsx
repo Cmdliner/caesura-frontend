@@ -102,16 +102,16 @@ export default function ProfilePage() {
                   <p className="mt-2 text-[13.5px] text-zinc-600 max-w-md leading-relaxed">{profile.bio}</p>
                 )}
               </div>
-              <div className="flex gap-2 flex-shrink-0">
+              <div className="flex gap-2 sm:gap-3 flex-shrink-0 flex-wrap sm:flex-nowrap">
                 <button
                   type="button"
-                  className="px-5 py-2 rounded-full bg-zinc-900 text-white text-[13px] font-semibold hover:bg-orange-500 transition-colors"
+                  className="px-4 sm:px-5 py-2 rounded-full bg-zinc-900 text-white text-[12px] sm:text-[13px] font-semibold hover:bg-orange-500 transition-colors"
                 >
                   Edit profile
                 </button>
                 <button
                   type="button"
-                  className="px-5 py-2 rounded-full border border-zinc-200 bg-white text-[13px] font-semibold text-zinc-700 hover:border-zinc-300 hover:bg-zinc-50 transition-colors shadow-sm"
+                  className="px-4 sm:px-5 py-2 rounded-full border border-zinc-200 bg-white text-[12px] sm:text-[13px] font-semibold text-zinc-700 hover:border-zinc-300 hover:bg-zinc-50 transition-colors shadow-sm"
                 >
                   Share
                 </button>
@@ -120,21 +120,21 @@ export default function ProfilePage() {
           </div>
 
           {/* Stats bar */}
-          <div className="flex items-center divide-x divide-zinc-200 rounded-xl bg-white border border-zinc-200 shadow-sm mb-6 px-2 animate-fade-up stagger-2">
+          <div className="flex items-center divide-x divide-zinc-200 rounded-lg sm:rounded-xl bg-white border border-zinc-200 shadow-sm mb-6 px-1 sm:px-2 gap-1 sm:gap-0 animate-fade-up stagger-2">
             {[
               { value: profileStats.stories_count, label: "Stories" },
               { value: profileStats.total_reads, label: "Reads" },
               { value: profileStats.follower_count, label: "Followers" },
             ].map(({ value, label }) => (
-              <div key={label} className="flex-1 text-center py-4 px-2">
-                <p className="text-2xl font-bold text-zinc-900 tabular-nums">{value}</p>
-                <p className="text-[11px] font-semibold uppercase tracking-wide text-zinc-400 mt-0.5">{label}</p>
+              <div key={label} className="flex-1 text-center py-3 sm:py-4 px-1 sm:px-2">
+                <p className="text-xl sm:text-2xl font-bold text-zinc-900 tabular-nums">{value}</p>
+                <p className="text-[10px] sm:text-[11px] font-semibold uppercase tracking-wide text-zinc-400 mt-0.5">{label}</p>
               </div>
             ))}
           </div>
 
           {/* Tabs — Wattpad-style underlines */}
-          <div className="flex border-b border-zinc-200 mb-7 bg-white rounded-t-xl -mb-px animate-fade-up stagger-3">
+          <div className="flex border-b border-zinc-200 mb-7 bg-white rounded-t-xl -mb-px animate-fade-up stagger-3 overflow-x-auto scrollbar-hide">
             {tabs.map((t) => (
               <button
                 key={t.id}
@@ -142,7 +142,7 @@ export default function ProfilePage() {
                 role="tab"
                 aria-selected={activeTab === t.id}
                 onClick={() => setActiveTab(t.id)}
-                className={`px-5 py-3.5 text-[13.5px] font-semibold transition-colors border-b-[2.5px] ${
+                className={`px-3 sm:px-5 py-3 sm:py-3.5 text-[12px] sm:text-[13.5px] font-semibold transition-colors border-b-[2.5px] whitespace-nowrap flex-shrink-0 ${
                   activeTab === t.id
                     ? "text-zinc-900 border-orange-500"
                     : "text-zinc-500 border-transparent hover:text-zinc-800"

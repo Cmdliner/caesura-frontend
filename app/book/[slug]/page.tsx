@@ -129,33 +129,33 @@ export default function BookReaderPage() {
           onScroll={handleScroll}
         >
           {/* Reading Area */}
-          <div className="flex-1 px-4 sm:px-6 py-12">
+          <div className="flex-1 px-3 sm:px-4 md:px-6 py-6 sm:py-8 md:py-12">
             {chapterLoading ? (
-              <div className="max-w-3xl mx-auto flex items-center justify-center py-20">
+              <div className="max-w-3xl mx-auto flex items-center justify-center py-12 sm:py-20">
                 <div className="text-center">
-                  <div className="inline-flex h-12 w-12 animate-spin rounded-full border 4 border-zinc-200 border-t-orange-500" />
-                  <p className="mt-4 text-zinc-600">Loading chapter...</p>
+                  <div className="inline-flex h-10 sm:h-12 w-10 sm:w-12 animate-spin rounded-full border-[3px] sm:border-4 border-zinc-200 border-t-orange-500" />
+                  <p className="mt-3 sm:mt-4 text-sm sm:text-base text-zinc-600">Loading chapter...</p>
                 </div>
               </div>
             ) : chapterError || !chapter ? (
-              <div className="max-w-3xl mx-auto rounded-lg bg-red-50 p-6 text-center">
-                <p className="text-red-700">Failed to load chapter content</p>
+              <div className="max-w-3xl mx-auto rounded-lg bg-red-50 p-4 sm:p-6 text-center">
+                <p className="text-sm sm:text-base text-red-700 font-medium">Failed to load chapter content</p>
               </div>
             ) : (
               <>
                 {/* Chapter Header */}
-                <div className="max-w-3xl mx-auto mb-12">
-                  <div className="text-center mb-8">
-                    <p className="text-sm font-semibold uppercase tracking-wider text-orange-500">
+                <div className="max-w-3xl mx-auto mb-8 sm:mb-10 md:mb-12">
+                  <div className="text-center mb-6 sm:mb-8">
+                    <p className="text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-orange-500">
                       Chapter {chapter.chapter_number}
                     </p>
                     {chapter.title && (
-                      <h1 className="mt-2 text-4xl font-extrabold text-zinc-900">
+                      <h1 className="mt-2 sm:mt-3 text-2xl sm:text-3xl md:text-4xl font-extrabold text-zinc-900 leading-tight">
                         {chapter.title}
                       </h1>
                     )}
                     {chapter.published_at && (
-                      <p className="mt-3 text-sm text-zinc-500">
+                      <p className="mt-2 sm:mt-3 text-xs sm:text-sm text-zinc-500">
                         Published {new Date(chapter.published_at).toLocaleDateString("en-US", {
                           year: "numeric",
                           month: "long",
@@ -173,14 +173,14 @@ export default function BookReaderPage() {
                         style={{ width: `${scrollProgress}%` }}
                       />
                     </div>
-                    <span className="text-xs text-zinc-500 font-medium">
+                    <span className="text-[10px] sm:text-xs text-zinc-500 font-medium flex-shrink-0">
                       {Math.round(scrollProgress)}%
                     </span>
                   </div>
                 </div>
 
                 {/* Content */}
-                <div className="max-w-3xl mx-auto">
+                <div className="max-w-3xl mx-auto px-1">
                   <TipTapRenderer
                     contentHtml={chapter.content_html}
                     content={chapter.content}
@@ -189,8 +189,8 @@ export default function BookReaderPage() {
                 </div>
 
                 {/* Chapter Navigation */}
-                <div className="max-w-3xl mx-auto mt-16 pt-8 border-t border-zinc-200">
-                  <div className="flex items-center justify-between gap-4">
+                <div className="max-w-3xl mx-auto mt-12 sm:mt-16 pt-6 sm:pt-8 border-t border-zinc-200">
+                  <div className="flex items-center justify-between gap-2 sm:gap-4 px-1">
                     <button
                       onClick={() => {
                         if (currentChapter > 1) {
@@ -200,7 +200,7 @@ export default function BookReaderPage() {
                         }
                       }}
                       disabled={currentChapter === 1}
-                      className="flex-1 inline-flex items-center justify-center gap-2 rounded-lg border border-zinc-200 px-4 py-3 font-medium text-zinc-700 transition-colors hover:border-zinc-300 hover:bg-zinc-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="flex-1 inline-flex items-center justify-center gap-1 sm:gap-2 rounded-lg border border-zinc-200 px-2 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm font-medium text-zinc-700 transition-colors hover:border-zinc-300 hover:bg-zinc-50 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       <svg
                         className="h-4 w-4"
@@ -218,7 +218,7 @@ export default function BookReaderPage() {
                       <span className="hidden sm:inline">Previous</span>
                     </button>
 
-                    <div className="relative">
+                    <div className="relative flex-shrink-0">
                       <select
                         value={currentChapter}
                         onChange={(e) => {
@@ -226,7 +226,7 @@ export default function BookReaderPage() {
                           setScrollProgress(0);
                           window.scrollTo(0, 0);
                         }}
-                        className="appearance-none px-3 py-2 rounded-lg border border-zinc-200 bg-white text-sm font-medium text-zinc-700 hover:border-zinc-300 focus:border-orange-400 focus:outline-none cursor-pointer pr-8"
+                        className="appearance-none px-2 sm:px-3 py-2 rounded-lg border border-zinc-200 bg-white text-xs sm:text-sm font-medium text-zinc-700 hover:border-zinc-300 focus:border-orange-400 focus:outline-none cursor-pointer pr-6 sm:pr-8"
                       >
                         {book.chapters.map((ch) => (
                           <option key={ch.id} value={ch.chapter_number}>
@@ -259,7 +259,7 @@ export default function BookReaderPage() {
                         }
                       }}
                       disabled={currentChapter === book.chapters.length}
-                      className="flex-1 inline-flex items-center justify-center gap-2 rounded-lg border border-zinc-200 px-4 py-3 font-medium text-zinc-700 transition-colors hover:border-zinc-300 hover:bg-zinc-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="flex-1 inline-flex items-center justify-center gap-1 sm:gap-2 rounded-lg border border-zinc-200 px-2 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm font-medium text-zinc-700 transition-colors hover:border-zinc-300 hover:bg-zinc-50 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       <span className="hidden sm:inline">Next</span>
                       <svg
