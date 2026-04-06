@@ -78,6 +78,16 @@ declare global {
       created_at: string;
     }
 
+    interface AuthoredBook {
+      id: string;
+      title: string;
+      slug: string;
+      description?: string;
+      status: string;
+      cover_url?: string;
+      created_at: string;
+    }
+
     interface ProgressSummary {
       chapter_id: string;
       scroll_position: number;
@@ -116,6 +126,15 @@ declare global {
     interface UpdateProgressRequest {
       chapter_id: string;
       scroll_position: number;
+    }
+
+    interface CreateBookRequest {
+      title: string;
+      description?: string;
+      cover_url?: string;
+      language?: string;
+      authors?: string[];
+      genre_ids?: number[];
     }
 
     // User Profile Types

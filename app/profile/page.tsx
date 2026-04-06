@@ -4,14 +4,15 @@ import Link from "next/link";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
-import Header from "@/components/layout/header";
+import AppNav from "@/components/layout/app-nav";
 import Footer from "@/components/layout/footer";
-import { storiesAPI } from "@/lib/api/stories";
+import ProfileWritingSection from "@/components/profile/profile-writing-section";
+import { booksAPI } from "@/lib/api/books";
 import { tokenManager, userManager } from "@/lib/utils";
 
 const tabs = [
   { id: "overview", label: "Overview" },
-  { id: "writing", label: "My writing" },
+  { id: "writing", label: "My Writing" },
   { id: "reading", label: "Reading" },
 ] as const;
 
@@ -23,7 +24,6 @@ export default function ProfilePage() {
   const [currentUser, setCurrentUser] = useState<API.User | null>(null);
   const [activeTab, setActiveTab] = useState<TabId>("overview");
 
-  // Check auth and load current user from localStorage
   useEffect(() => {
     setMounted(true);
     if (!tokenManager.hasToken()) {
@@ -34,295 +34,190 @@ export default function ProfilePage() {
     }
   }, [router]);
 
-  // Fetch user stories
-  const { data: stories = [], isLoading: storiesLoading } = useQuery({
-    queryKey: ['user-stories'],
-    queryFn: () => storiesAPI.getUserStories(),
+  const { data: authoredBooks = [], isLoading: booksLoading } = useQuery({
+    queryKey: ["authored-books"],
+    queryFn: () => booksAPI.getAuthoredBooks(),
     enabled: mounted && tokenManager.hasToken(),
   });
 
-  // Generate initials from display name or username
   const getInitials = (displayName?: string, username?: string) => {
     const name = displayName || username || "?";
-    return name
-      .split(" ")
-      .slice(0, 2)
-      .map((n) => n[0])
-      .join("")
-      .toUpperCase();
+    return name.split(" ").slice(0, 2).map((n) => n[0]).join("").toUpperCase();
   };
 
   if (!mounted || !currentUser) {
     return (
       <>
-        <Header />
-        <main className="relative min-h-screen overflow-x-hidden bg-[#f6f8fc] pb-16 pt-[4.5rem] sm:pt-24 flex items-center justify-center">
+        <AppNav />
+        <main className="min-h-screen bg-white pt-[60px] flex items-center justify-center">
           <div className="text-center">
-            <div className="inline-flex h-12 w-12 animate-spin rounded-full border-4 border-zinc-200 border-t-orange-500" />
-            <p className="mt-4 text-zinc-600">Loading profile...</p>
+            <div className="inline-flex h-10 w-10 animate-spin rounded-full border-[3px] border-zinc-200 border-t-orange-500" />
+            <p className="mt-4 text-sm text-zinc-500">Loading profile…</p>
           </div>
         </main>
-        <Footer />
       </>
     );
   }
 
   const profile = currentUser;
-
-  // Compute stats from available data
   const profileStats = {
-    stories_count: stories.length,
+    stories_count: authoredBooks.length,
     total_reads: 0,
     follower_count: 0,
   };
 
   return (
     <>
-      <Header />
-      <main className="relative min-h-screen overflow-x-hidden bg-[#f6f8fc] pb-16 pt-[4.5rem] sm:pt-24">
-        <div
-          className="pointer-events-none absolute inset-x-0 top-0 z-0 h-40 bg-linear-to-br from-orange-200/80 via-orange-100/60 to-amber-50 sm:h-48"
-          aria-hidden="true"
-        />
-        <div
-          className="pointer-events-none absolute inset-x-0 top-0 z-0 h-40 bg-[linear-gradient(rgba(30,41,59,0.04)_1px,transparent_1px),linear-gradient(90deg,rgba(30,41,59,0.04)_1px,transparent_1px)] [background-size:24px_24px] opacity-60 sm:h-48"
-          aria-hidden="true"
-        />
+      <AppNav />
+      <main className="min-h-screen bg-[#f8f8f8] pt-[60px] pb-16 page-enter">
+        {/* Cover band */}
+        <div className="h-36 sm:h-44 bg-gradient-to-r from-orange-400 via-orange-500 to-amber-400" />
 
-        <div className="relative z-10 mx-auto max-w-5xl px-4 sm:px-6">
-          <nav className="mb-4 text-xs text-zinc-500 sm:mb-6 sm:text-sm" aria-label="Breadcrumb">
-            <Link href="/" className="transition-colors hover:text-orange-600">
-              Home
-            </Link>
-            <span className="mx-2 text-zinc-400" aria-hidden="true">
-              /
-            </span>
-            <span className="font-medium text-zinc-700">Profile</span>
-          </nav>
-
-          <div className="flex flex-col items-center gap-6 sm:flex-row sm:items-end sm:gap-8">
-            <div className="-mt-12 flex shrink-0 flex-col items-center sm:-mt-16 sm:items-start">
+        <div className="mx-auto max-w-[1000px] px-4 sm:px-6">
+          {/* Avatar + name row */}
+          <div className="flex flex-col sm:flex-row sm:items-end gap-5 -mt-14 sm:-mt-16 mb-6 animate-fade-up">
+            {/* Avatar */}
+            <div className="flex-shrink-0">
               {profile.avatar_url ? (
                 <img
                   src={profile.avatar_url}
                   alt={profile.display_name || profile.username}
-                  className="flex h-28 w-28 items-center justify-center rounded-full border-4 border-white object-cover shadow-lg ring-1 ring-black/5 sm:h-32 sm:w-32"
+                  className="h-28 w-28 sm:h-32 sm:w-32 rounded-full object-cover border-4 border-white shadow-lg"
                 />
               ) : (
-                <div
-                  className="flex h-28 w-28 items-center justify-center rounded-full border-4 border-white bg-linear-to-br from-orange-400 to-orange-600 text-3xl font-bold text-white shadow-lg ring-1 ring-black/5 sm:h-32 sm:w-32 sm:text-4xl"
-                  aria-hidden="true"
-                >
+                <div className="h-28 w-28 sm:h-32 sm:w-32 rounded-full border-4 border-white bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center text-3xl sm:text-4xl font-bold text-white shadow-lg">
                   {getInitials(profile.display_name, profile.username)}
                 </div>
               )}
             </div>
 
-            <div className="w-full min-w-0 flex-1 text-center sm:pb-2 sm:text-left">
-              <div className="flex flex-col items-center gap-1 sm:items-start">
-                <h1 className="text-2xl font-extrabold tracking-tight text-zinc-900 sm:text-3xl">
+            {/* Name / actions */}
+            <div className="flex-1 sm:pb-3 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+              <div>
+                <h1 className="text-2xl sm:text-3xl font-extrabold text-zinc-900 tracking-tight leading-tight">
                   {profile.display_name || profile.username}
                 </h1>
-                <p className="text-sm font-medium text-orange-600">@{profile.username}</p>
+                <p className="text-[14px] text-orange-500 font-semibold mt-0.5">@{profile.username}</p>
+                {profile.bio && (
+                  <p className="mt-2 text-[13.5px] text-zinc-600 max-w-md leading-relaxed">{profile.bio}</p>
+                )}
               </div>
-              {profile.bio && (
-                <p className="mx-auto mt-3 max-w-xl text-sm leading-relaxed text-zinc-600 sm:mx-0">
-                  {profile.bio}
-                </p>
-              )}
-              <div className="mt-4 flex flex-wrap items-center justify-center gap-2 sm:justify-start">
+              <div className="flex gap-2 flex-shrink-0">
                 <button
                   type="button"
-                  className="rounded-full bg-zinc-900 px-5 py-2 text-sm font-semibold text-white transition-colors hover:bg-orange-500"
+                  className="px-5 py-2 rounded-full bg-zinc-900 text-white text-[13px] font-semibold hover:bg-orange-500 transition-colors"
                 >
                   Edit profile
                 </button>
                 <button
                   type="button"
-                  className="rounded-full border border-zinc-200 bg-white px-5 py-2 text-sm font-semibold text-zinc-800 shadow-sm transition-colors hover:border-zinc-300 hover:bg-zinc-50"
+                  className="px-5 py-2 rounded-full border border-zinc-200 bg-white text-[13px] font-semibold text-zinc-700 hover:border-zinc-300 hover:bg-zinc-50 transition-colors shadow-sm"
                 >
-                  Share profile
+                  Share
                 </button>
               </div>
             </div>
           </div>
 
-          <div className="mt-8 grid grid-cols-3 gap-2 rounded-2xl border border-zinc-200/80 bg-white/90 p-4 shadow-sm backdrop-blur-sm sm:gap-4 sm:p-5">
-            <div className="text-center">
-              <p className="text-lg font-bold tabular-nums text-zinc-900 sm:text-2xl">
-                {profileStats.stories_count}
-              </p>
-              <p className="text-[11px] font-medium uppercase tracking-wide text-zinc-500 sm:text-xs">
-                Stories
-              </p>
-            </div>
-            <div className="border-x border-zinc-100 text-center">
-              <p className="text-lg font-bold tabular-nums text-zinc-900 sm:text-2xl">
-                {profileStats.total_reads}
-              </p>
-              <p className="text-[11px] font-medium uppercase tracking-wide text-zinc-500 sm:text-xs">
-                Reads
-              </p>
-            </div>
-            <div className="text-center">
-              <p className="text-lg font-bold tabular-nums text-zinc-900 sm:text-2xl">
-                {profileStats.follower_count}
-              </p>
-              <p className="text-[11px] font-medium uppercase tracking-wide text-zinc-500 sm:text-xs">
-                Followers
-              </p>
-            </div>
+          {/* Stats bar */}
+          <div className="flex items-center divide-x divide-zinc-200 rounded-xl bg-white border border-zinc-200 shadow-sm mb-6 px-2 animate-fade-up stagger-2">
+            {[
+              { value: profileStats.stories_count, label: "Stories" },
+              { value: profileStats.total_reads, label: "Reads" },
+              { value: profileStats.follower_count, label: "Followers" },
+            ].map(({ value, label }) => (
+              <div key={label} className="flex-1 text-center py-4 px-2">
+                <p className="text-2xl font-bold text-zinc-900 tabular-nums">{value}</p>
+                <p className="text-[11px] font-semibold uppercase tracking-wide text-zinc-400 mt-0.5">{label}</p>
+              </div>
+            ))}
           </div>
 
-          <div className="mt-8 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-            <div
-              className="flex w-full gap-1 rounded-xl border border-zinc-200 bg-white p-1 shadow-sm sm:w-auto"
-              role="tablist"
-              aria-label="Profile sections"
-            >
-              {tabs.map((t) => (
-                <button
-                  key={t.id}
-                  type="button"
-                  role="tab"
-                  aria-selected={activeTab === t.id}
-                  onClick={() => setActiveTab(t.id)}
-                  className={`min-h-10 flex-1 rounded-lg px-3 py-2 text-center text-sm font-semibold transition-colors sm:min-h-0 sm:flex-none sm:px-4 ${
-                    activeTab === t.id
-                      ? "bg-zinc-900 text-white"
-                      : "text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900"
-                  }`}
-                >
-                  {t.label}
-                </button>
-              ))}
-            </div>
-            <div className="flex flex-wrap justify-center gap-2 sm:justify-end">
-              <Link
-                href="/library"
-                className="text-sm font-semibold text-orange-600 underline-offset-4 hover:underline"
+          {/* Tabs — Wattpad-style underlines */}
+          <div className="flex border-b border-zinc-200 mb-7 bg-white rounded-t-xl -mb-px animate-fade-up stagger-3">
+            {tabs.map((t) => (
+              <button
+                key={t.id}
+                type="button"
+                role="tab"
+                aria-selected={activeTab === t.id}
+                onClick={() => setActiveTab(t.id)}
+                className={`px-5 py-3.5 text-[13.5px] font-semibold transition-colors border-b-[2.5px] ${
+                  activeTab === t.id
+                    ? "text-zinc-900 border-orange-500"
+                    : "text-zinc-500 border-transparent hover:text-zinc-800"
+                }`}
               >
-                My library
-              </Link>
-              <span className="hidden text-zinc-300 sm:inline" aria-hidden="true">
-                ·
-              </span>
-              <Link
-                href="/create-story"
-                className="text-sm font-semibold text-orange-600 underline-offset-4 hover:underline"
-              >
-                New story
-              </Link>
-            </div>
+                {t.label}
+              </button>
+            ))}
           </div>
 
-          <div className="mt-6 min-h-[280px]">
+          {/* Tab body */}
+          <div className="min-h-[240px] animate-fade-up stagger-4">
+            {/* ── Overview ── */}
             {activeTab === "overview" && (
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 <Link
                   href="/library"
-                  className="group rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm transition-all hover:border-orange-200 hover:shadow-md"
+                  className="group rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm hover:border-orange-200 hover:shadow-md transition-all"
                 >
-                  <p className="text-xs font-semibold uppercase tracking-wide text-orange-500">
-                    Library
-                  </p>
-                  <p className="mt-2 font-semibold text-zinc-900">Continue reading</p>
+                  <div className="h-8 w-8 rounded-lg bg-orange-50 flex items-center justify-center mb-3">
+                    <svg className="h-4 w-4 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                    </svg>
+                  </div>
+                  <p className="font-bold text-zinc-900 text-[15px]">Continue reading</p>
                   <p className="mt-1 text-sm text-zinc-500">Pick up where you left off.</p>
-                  <span className="mt-3 inline-block text-sm font-semibold text-orange-600 group-hover:underline">
+                  <span className="mt-3 inline-block text-[13px] font-semibold text-orange-500 group-hover:underline">
                     Open library →
                   </span>
                 </Link>
+
                 <Link
                   href="/create-story"
-                  className="group rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm transition-all hover:border-orange-200 hover:shadow-md"
+                  className="group rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm hover:border-orange-200 hover:shadow-md transition-all"
                 >
-                  <p className="text-xs font-semibold uppercase tracking-wide text-orange-500">
-                    Write
-                  </p>
-                  <p className="mt-2 font-semibold text-zinc-900">Start a new draft</p>
+                  <div className="h-8 w-8 rounded-lg bg-orange-50 flex items-center justify-center mb-3">
+                    <svg className="h-4 w-4 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                    </svg>
+                  </div>
+                  <p className="font-bold text-zinc-900 text-[15px]">Start a new draft</p>
                   <p className="mt-1 text-sm text-zinc-500">Blank page, full possibility.</p>
-                  <span className="mt-3 inline-block text-sm font-semibold text-orange-600 group-hover:underline">
+                  <span className="mt-3 inline-block text-[13px] font-semibold text-orange-500 group-hover:underline">
                     Create story →
                   </span>
                 </Link>
+
                 <div className="rounded-2xl border border-dashed border-zinc-200 bg-white/60 p-5 sm:col-span-2 lg:col-span-1">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-zinc-400">
-                    Activity
-                  </p>
-                  <p className="mt-2 text-sm text-zinc-600">
-                    Recent likes, comments, and milestones will show here once you&apos;re active on
-                    Caesura.
-                  </p>
+                  <div className="h-8 w-8 rounded-lg bg-zinc-50 flex items-center justify-center mb-3">
+                    <svg className="h-4 w-4 text-zinc-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                    </svg>
+                  </div>
+                  <p className="font-bold text-zinc-400 text-[15px]">Activity</p>
+                  <p className="mt-1 text-sm text-zinc-400">Recent likes and comments will appear here.</p>
                 </div>
               </div>
             )}
 
+            {/* ── My Writing ── */}
             {activeTab === "writing" && (
-              <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
-                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                  <div>
-                    <h2 className="text-lg font-bold text-zinc-900">Published &amp; drafts</h2>
-                    <p className="text-sm text-zinc-500">Manage your stories from one place.</p>
-                  </div>
-                  <Link
-                    href="/create-story"
-                    className="inline-flex min-h-11 items-center justify-center rounded-xl bg-orange-500 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-zinc-900"
-                  >
-                    New story
-                  </Link>
-                </div>
-
-                {storiesLoading ? (
-                  <div className="mt-6 flex justify-center py-8">
-                    <div className="inline-flex h-10 w-10 animate-spin rounded-full border-4 border-zinc-200 border-t-orange-500" />
-                  </div>
-                ) : stories.length === 0 ? (
-                  <div className="mt-6 rounded-lg border border-dashed border-zinc-200 p-8 text-center">
-                    <p className="text-zinc-600">No stories yet.</p>
-                    <Link
-                      href="/create-story"
-                      className="mt-2 inline-block text-sm font-semibold text-orange-600 hover:underline"
-                    >
-                      Start writing →
-                    </Link>
-                  </div>
-                ) : (
-                  <ul className="mt-6 divide-y divide-zinc-100">
-                    {stories.map((story) => (
-                      <li
-                        key={story.id}
-                        className="flex flex-col gap-2 py-4 first:pt-0 sm:flex-row sm:items-center sm:justify-between"
-                      >
-                        <div>
-                          <p className="font-medium text-zinc-900">{story.title}</p>
-                          <p className="text-xs text-zinc-500">
-                            {story.status === "published" ? "Published" : "Draft"}
-                            {story.views_count > 0 && ` · ${story.views_count} views`}
-                          </p>
-                        </div>
-                        <button
-                          type="button"
-                          className="w-fit text-sm font-semibold text-orange-600 hover:underline"
-                        >
-                          Open
-                        </button>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </div>
+              <ProfileWritingSection books={authoredBooks} isLoading={booksLoading} />
             )}
 
+            {/* ── Reading ── */}
             {activeTab === "reading" && (
-              <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
-                <h2 className="text-lg font-bold text-zinc-900">Reading list</h2>
-                <p className="mt-1 text-sm text-zinc-500">Stories you&apos;ve saved for later.</p>
-                <div className="mt-6">
+              <div className="rounded-2xl bg-white border border-zinc-200 shadow-sm p-6">
+                <h2 className="text-[16px] font-bold text-zinc-900">Reading list</h2>
+                <p className="mt-1 text-sm text-zinc-500">Stories you&apos;ve saved to read later.</p>
+                <div className="mt-5">
                   <Link
                     href="/library"
-                    className="inline-block text-sm font-semibold text-orange-600 hover:underline"
+                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-zinc-900 text-white text-sm font-semibold hover:bg-orange-500 transition-colors"
                   >
-                    View your library →
+                    View my library →
                   </Link>
                 </div>
               </div>

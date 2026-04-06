@@ -2,11 +2,14 @@
 
 import Link from "next/link";
 import { useState, useEffect } from "react";
+import { useAuth } from "@/app/providers/auth-provider";
 
 export default function Header() {
+    const { isAuthenticated, user } = useAuth();
     const [isOpen, setIsOpen] = useState(false);
     const [bgColor, setBgColor] = useState("transparent");
     const [textColor, setTextColor] = useState("text-white");
+    const [showUserMenu, setShowUserMenu] = useState(false);
 
     useEffect(() => {
         if (!isOpen) {
@@ -94,19 +97,80 @@ export default function Header() {
                     </ul>
                 </nav>
 
-                {/* Desktop Login Button */}
-                <Link
-                    href="/login"
-                    className="hidden group relative justify-self-end rounded-full p-1 md:block"
-                >
-                    <span
-                        aria-hidden="true"
-                        className="pointer-events-none absolute inset-0 rounded-full border-2 border-orange-500 opacity-0 transition-all duration-300 ease-out group-hover:opacity-100 group-hover:border-black"
-                    />
-                    <span className="block rounded-full bg-orange-500 px-14 py-2 text-base font-semibold text-white transition-colors duration-300 ease-out group-hover:bg-black">
-                        Login
-                    </span>
-                </Link>
+                {/* Desktop Auth Button / Profile */}
+                {!isAuthenticated ? (
+                    <Link
+                        href="/login"
+                        className="hidden group relative justify-self-end rounded-full p-1 md:block"
+                    >
+                        <span
+                            aria-hidden="true"
+                            className="pointer-events-none absolute inset-0 rounded-full border-2 border-orange-500 opacity-0 transition-all duration-300 ease-out group-hover:opacity-100 group-hover:border-black"
+                        />
+                        <span className="block rounded-full bg-orange-500 px-14 py-2 text-base font-semibold text-white transition-colors duration-300 ease-out group-hover:bg-black">
+                            Login
+                        </span>
+                    </Link>
+                ) : (
+                    <div className="hidden md:block">
+                        <button
+                            onClick={() => setShowUserMenu(!showUserMenu)}
+                            className={`flex items-center gap-2 px-3 py-2 rounded-full transition-all duration-200 ${
+                                textColor === "text-white"
+                                    ? "hover:bg-white/10"
+                                    : "hover:bg-black/10"
+                            }`}
+                        >
+                            {user?.avatar_url ? (
+                                <img
+                                    src={user.avatar_url}
+                                    alt={user.username}
+                                    className="h-8 w-8 rounded-full object-cover"
+                                />
+                            ) : (
+                                <div className={`h-8 w-8 rounded-full bg-orange-500 flex items-center justify-center text-white text-sm font-semibold`}>
+                                    {user?.username?.[0]?.toUpperCase() || "U"}
+                                </div>
+                            )}
+                            <span className={`text-sm font-medium ${textColor}`}>
+                                {user?.username || "Profile"}
+                            </span>
+                        </button>
+
+                        {/* Profile Dropdown */}
+                        {showUserMenu && (
+                            <div
+                                className={`absolute right-6 mt-2 w-48 rounded-lg shadow-lg border z-50 ${
+                                    bgColor === "transparent"
+                                        ? "bg-white text-black border-zinc-200"
+                                        : "bg-white text-black border-zinc-200"
+                                }`}
+                            >
+                                <Link
+                                    href="/library"
+                                    className="block px-4 py-3 text-sm font-medium hover:bg-zinc-50 rounded-t-lg border-b border-zinc-100"
+                                    onClick={() => setShowUserMenu(false)}
+                                >
+                                    My Library
+                                </Link>
+                                <Link
+                                    href="/write"
+                                    className="block px-4 py-3 text-sm font-medium hover:bg-zinc-50 border-b border-zinc-100"
+                                    onClick={() => setShowUserMenu(false)}
+                                >
+                                    Write a Story
+                                </Link>
+                                <Link
+                                    href="/profile"
+                                    className="block px-4 py-3 text-sm font-medium hover:bg-zinc-50 rounded-b-lg"
+                                    onClick={() => setShowUserMenu(false)}
+                                >
+                                    Profile
+                                </Link>
+                            </div>
+                        )}
+                    </div>
+                )}
 
                 {/* Mobile Hamburger Button - Stylish Staggered Design */}
                 <button
@@ -158,17 +222,45 @@ export default function Header() {
                                     </Link>
                                 </li>
                             ))}
-                            <li className="border-t border-gray-200 pt-6">
-                                <Link
-                                    href="/login"
-                                    onClick={() => setIsOpen(false)}
-                                    className="group relative block w-full rounded-full border-2 border-transparent p-1 text-center transition-colors duration-300 hover:border-black"
-                                >
-                                    <span className="block rounded-full bg-orange-500 px-6 py-3 text-xl font-semibold text-white transition-colors duration-300 ease-out group-hover:bg-black">
-                                        Login
-                                    </span>
-                                </Link>
-                            </li>
+                            {!isAuthenticated ? (
+                                <li className="border-t border-gray-200 pt-6">
+                                    <Link
+                                        href="/login"
+                                        onClick={() => setIsOpen(false)}
+                                        className="group relative block w-full rounded-full border-2 border-transparent p-1 text-center transition-colors duration-300 hover:border-black"
+                                    >
+                                        <span className="block rounded-full bg-orange-500 px-6 py-3 text-xl font-semibold text-white transition-colors duration-300 ease-out group-hover:bg-black">
+                                            Login
+                                        </span>
+                                    </Link>
+                                </li>
+                            ) : (
+                                <>
+                                    <li className="border-t border-gray-200 pt-6">
+                                        <Link
+                                            href="/library"
+                                            onClick={() => setIsOpen(false)}
+                                            className="block text-lg font-medium text-black mb-3 hover:text-gray-700"
+                                        >
+                                            My Library
+                                        </Link>
+                                        <Link
+                                            href="/write"
+                                            onClick={() => setIsOpen(false)}
+                                            className="block text-lg font-medium text-black mb-3 hover:text-gray-700"
+                                        >
+                                            Write a Story
+                                        </Link>
+                                        <Link
+                                            href="/profile"
+                                            onClick={() => setIsOpen(false)}
+                                            className="block text-lg font-medium text-black hover:text-gray-700"
+                                        >
+                                            Profile
+                                        </Link>
+                                    </li>
+                                </>
+                            )}
                         </ul>
                     </nav>
                 </>

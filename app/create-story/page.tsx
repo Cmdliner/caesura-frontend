@@ -11,6 +11,9 @@ export default function CreateStoryPage() {
   const [step, setStep] = useState<"create" | "chapters">("create");
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
+  const [authors, setAuthors] = useState<string[]>([]);
+  const [authorInput, setAuthorInput] = useState("");
+  const [genreIds, setGenreIds] = useState<number[]>([]);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(false);
   const [createdBook, setCreatedBook] = useState<API.BookDetail | null>(null);
@@ -39,6 +42,8 @@ export default function CreateStoryPage() {
         title: title.trim(),
         description: description.trim() || undefined,
         language: "en",
+        authors: authors.length > 0 ? authors : undefined,
+        genre_ids: genreIds.length > 0 ? genreIds : undefined,
       });
       setCreatedBook(book);
       setStep("chapters");
@@ -52,6 +57,18 @@ export default function CreateStoryPage() {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleAddAuthor = () => {
+    const trimmedAuthor = authorInput.trim();
+    if (trimmedAuthor && !authors.includes(trimmedAuthor)) {
+      setAuthors([...authors, trimmedAuthor]);
+      setAuthorInput("");
+    }
+  };
+
+  const handleRemoveAuthor = (index: number) => {
+    setAuthors(authors.filter((_, i) => i !== index));
   };
 
   return (
@@ -154,7 +171,58 @@ export default function CreateStoryPage() {
                   </p>
                 </div>
 
-                {/* Info Box */}
+                {/* Authors Section */}
+                <div className="space-y-3">
+                  <label className="block text-sm font-semibold text-zinc-900">
+                    Additional Authors (Optional)
+                  </label>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={authorInput}
+                      onChange={(e) => setAuthorInput(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          handleAddAuthor();
+                        }
+                      }}
+                      placeholder="Enter author name and press Enter..."
+                      className="flex-1 px-4 py-3 rounded-lg border border-zinc-200 bg-white text-sm transition-colors focus:border-orange-400 focus:ring-1 focus:ring-orange-100 focus:outline-none"
+                      disabled={isLoading}
+                    />
+                    <button
+                      type="button"
+                      onClick={handleAddAuthor}
+                      className="px-4 py-3 rounded-lg bg-zinc-100 text-zinc-700 text-sm font-semibold hover:bg-zinc-200 transition-colors disabled:opacity-50"
+                      disabled={isLoading || !authorInput.trim()}
+                    >
+                      Add
+                    </button>
+                  </div>
+                  {authors.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mt-3">
+                      {authors.map((author, index) => (
+                        <div
+                          key={index}
+                          className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-orange-100 text-orange-700 text-sm font-medium"
+                        >
+                          {author}
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveAuthor(index)}
+                            className="ml-1 hover:text-orange-900 transition-colors"
+                          >
+                            ×
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  <p className="text-xs text-zinc-500">
+                    Add co-authors or collaborators to your story. You can add up to 5 authors.
+                  </p>
+                </div>
                 <div className="rounded-lg border border-blue-200 bg-blue-50 p-4">
                   <div className="flex gap-3">
                     <svg

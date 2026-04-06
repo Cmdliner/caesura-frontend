@@ -10,28 +10,28 @@ import { booksAPI } from "@/lib/api/books";
 export default function WriteChapterPage() {
   const router = useRouter();
   const params = useParams();
-  const bookId = params?.bookId as string;
+  const bookSlug = params?.bookId as string;
   const chapterId = params?.chapterId as string;
 
   const [book, setBook] = useState<API.BookDetail | null>(null);
   const [chapterTitle, setChapterTitle] = useState("");
   const [chapterContent, setChapterContent] = useState<any>(null);
+  const [chapterHtml, setChapterHtml] = useState("");
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(false);
 
   // Load book on mount
   useEffect(() => {
-    if (bookId) {
+    if (bookSlug) {
       booksAPI
-        .getBook(bookId)
+        .getAuthoredBook(bookSlug)
         .then(setBook)
         .catch((err) => {
-          setErrors({
-            submit: err?.message || "Failed to load story",
-          });
-        });
+          setErrors({submit: err?.message || "Failed to load story"});
+        })
+        .finally(() => setIsLoading(false));
     }
-  }, [bookId]);
+  }, [bookSlug]);
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
@@ -53,13 +53,15 @@ export default function WriteChapterPage() {
 
     setIsLoading(true);
     try {
-      await booksAPI.createChapter(bookId, {
+      const nextChapterNumber = (book?.chapters?.length || 0) + 1;
+      await booksAPI.createChapter(book!.id, {
+        chapter_number: nextChapterNumber,
         title: chapterTitle.trim() || undefined,
         content: chapterContent,
       });
 
       // Navigate back to book view
-      router.push(`/write/${bookId}`);
+      router.push(`/write/${bookSlug}`);
     } catch (error: any) {
       setErrors({
         submit:
@@ -97,7 +99,7 @@ export default function WriteChapterPage() {
           {/* Page Header */}
           <div className="mb-8">
             <Link
-              href={`/write/${bookId}`}
+              href={`/write/${bookSlug}`}
               className="text-sm text-zinc-500 hover:text-orange-600 transition-colors mb-4 inline-flex items-center gap-1"
             >
               <svg
@@ -157,9 +159,10 @@ export default function WriteChapterPage() {
               <label className="block text-sm font-semibold text-zinc-900">
                 Chapter Content *
               </label>
-              <StoryEditor
+                <StoryEditor
                 initialContent={chapterContent}
                 onChange={setChapterContent}
+                onHtmlChange={setChapterHtml}
                 disabled={isLoading}
                 placeholder="Start writing your chapter here... Use the toolbar to format your text."
               />
@@ -178,7 +181,7 @@ export default function WriteChapterPage() {
                 {isLoading ? "Saving..." : "Save Chapter"}
               </button>
               <Link
-                href={`/write/${bookId}`}
+                href={`/write/${bookSlug}`}
                 className="px-6 py-3 rounded-lg border border-zinc-200 bg-white text-zinc-900 font-semibold hover:bg-zinc-50 transition-colors"
               >
                 Cancel

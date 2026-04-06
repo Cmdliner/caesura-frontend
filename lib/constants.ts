@@ -18,6 +18,8 @@ export const ENDPOINTS = {
     GET: (slug: string) => `/books/${slug}`,
     CREATE: '/books',
     UPDATE: (id: string) => `/books/${id}`,
+    AUTHORED: '/user/books/authored',
+    AUTHORED_DETAIL: (slug: string) => `/user/books/authored/${slug}`,
   },
   // Chapters
   CHAPTERS: {

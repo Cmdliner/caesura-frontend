@@ -9,23 +9,23 @@ import { booksAPI } from "@/lib/api/books";
 export default function BookWritePage() {
   const router = useRouter();
   const params = useParams();
-  const bookId = params?.bookId as string;
+  const bookSlug = params?.bookId as string;
 
   const [book, setBook] = useState<API.BookDetail | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
 
   useEffect(() => {
-    if (bookId) {
+    if (bookSlug) {
       booksAPI
-        .getBook(bookId)
+        .getAuthoredBook(bookSlug)
         .then(setBook)
         .catch((err) => {
           setError(err?.message || "Failed to load story");
         })
         .finally(() => setIsLoading(false));
     }
-  }, [bookId]);
+  }, [bookSlug]);
 
   if (isLoading) {
     return (
@@ -184,7 +184,7 @@ export default function BookWritePage() {
 
           {/* Add Chapter Button */}
           <Link
-            href={`/write/${book.id}/chapter/new`}
+            href={`/write/${book.slug}/chapter/new`}
             className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg bg-orange-500 text-white font-semibold hover:bg-orange-600 transition-colors"
           >
             <svg

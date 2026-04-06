@@ -14,14 +14,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<API.User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Initialize auth state from storage
   useEffect(() => {
     const storedUser = userManager.getUser();
     const hasToken = tokenManager.hasToken();
 
-    if (storedUser && hasToken) {
-      setUser(storedUser);
-    }
+    if (storedUser && hasToken) setUser(storedUser);
 
     setIsLoading(false);
   }, []);

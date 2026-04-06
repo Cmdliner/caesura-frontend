@@ -14,9 +14,20 @@ export const booksAPI = {
     return response.data;
   },
 
+  getAuthoredBooks: async (): Promise<API.AuthoredBook[]> => {
+    const response = await apiClient.get<API.AuthoredBook[]>(
+      ENDPOINTS.BOOKS.AUTHORED
+    );
+    return Array.isArray(response.data) ? response.data : [];
+  },
 
-  getBook: async (slug: string): Promise<API.BookDetail> => {
-    const response = await apiClient.get<API.BookDetail | { book: API.BookDetail }>(ENDPOINTS.BOOKS.GET(slug));
+  getAuthoredBook: async (slug: string): Promise<API.BookDetail> => {
+     const response = await apiClient.get<API.BookDetail | { book: API.BookDetail }>(ENDPOINTS.BOOKS.AUTHORED_DETAIL(slug));
+    return ('chapters' in response.data) ? response.data : response.data.book;
+  },
+
+  getBook: async (slugOrId: string): Promise<API.BookDetail> => {
+    const response = await apiClient.get<API.BookDetail | { book: API.BookDetail }>(ENDPOINTS.BOOKS.GET(slugOrId));
     return ('chapters' in response.data) ? response.data : response.data.book;
   },
 
@@ -56,7 +67,7 @@ export const booksAPI = {
     await apiClient.post(ENDPOINTS.PROGRESS.UPDATE(bookId), progress);
   },
 
-  createBook: async (data: any): Promise<API.BookDetail> => {
+  createBook: async (data: API.CreateBookRequest): Promise<API.BookDetail> => {
     const response = await apiClient.post<{ book: API.BookDetail }>(ENDPOINTS.BOOKS.CREATE, data);
     return response.data.book;
   },
@@ -74,6 +85,7 @@ export const booksAPI = {
     data: {
       title?: string;
       content: Record<string, unknown>; // TipTap JSON format
+      chapter_number?: number;
     }
   ): Promise<API.ChapterDetail> => {
     const response = await apiClient.post<{ chapter: API.ChapterDetail }>(

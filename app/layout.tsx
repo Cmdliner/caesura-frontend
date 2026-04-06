@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Akaya_Kanadaka, Geist_Mono, Sora } from "next/font/google";
 import SmoothScroll from "@/components/layout/smooth-scroll";
 import { Providers } from "@/app/providers";
+import { Toaster } from "sonner";
 import "./globals.css";
 
 const sora = Sora({
@@ -38,8 +39,17 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col">
         <Providers>
           <SmoothScroll>{children}</SmoothScroll>
+          <Toaster
+            position="bottom-right"
+            richColors
+            toastOptions={{
+              duration: 3500,
+              style: { fontFamily: "var(--font-sora), sans-serif", fontSize: "13.5px" },
+            }}
+          />
         </Providers>
       </body>
+
     </html>
   );
 }
