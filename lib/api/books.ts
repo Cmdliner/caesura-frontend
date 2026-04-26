@@ -67,9 +67,17 @@ export const booksAPI = {
     await apiClient.post(ENDPOINTS.PROGRESS.UPDATE(bookId), progress);
   },
 
-  createBook: async (data: API.CreateBookRequest): Promise<API.BookDetail> => {
-    const response = await apiClient.post<{ book: API.BookDetail }>(ENDPOINTS.BOOKS.CREATE, data);
-    return response.data.book;
+  searchBooks: async (q: string): Promise<API.BookSummary[]> => {
+    const response = await apiClient.get<{ results: API.BookSummary[] }>(
+      ENDPOINTS.BOOKS.SEARCH,
+      { params: { q } }
+    );
+    return response.data.results ?? [];
+  },
+
+  createBook: async (data: API.CreateBookRequest): Promise<API.CreateBookResponse> => {
+    const response = await apiClient.post<API.CreateBookResponse>(ENDPOINTS.BOOKS.CREATE, data);
+    return response.data;
   },
 
   updateBook: async (id: string, data: any): Promise<API.BookDetail> => {
@@ -84,13 +92,29 @@ export const booksAPI = {
     bookId: string,
     data: {
       title?: string;
-      content: Record<string, unknown>; // TipTap JSON format
+      content: Record<string, unknown>;
       chapter_number?: number;
+      word_count?: number;
     }
   ): Promise<API.ChapterDetail> => {
     const response = await apiClient.post<{ chapter: API.ChapterDetail }>(
       ENDPOINTS.CHAPTERS.CREATE(bookId),
       data
+    );
+    return response.data.chapter;
+  },
+
+  deleteBook: async (bookId: string): Promise<void> => {
+    await apiClient.delete(ENDPOINTS.BOOKS.UPDATE(bookId));
+  },
+
+  deleteChapter: async (bookId: string, chapterId: string): Promise<void> => {
+    await apiClient.delete(ENDPOINTS.CHAPTERS.DELETE(bookId, chapterId));
+  },
+
+  getAuthoredChapter: async (bookId: string, chapterNumber: number): Promise<API.ChapterDetail> => {
+    const response = await apiClient.get<{ chapter: API.ChapterDetail }>(
+      `/user/books/${bookId}/chapters/${chapterNumber}`
     );
     return response.data.chapter;
   },
@@ -101,6 +125,8 @@ export const booksAPI = {
     data: {
       title?: string;
       content?: Record<string, unknown>;
+      word_count?: number;
+      status?: string;
     }
   ): Promise<API.ChapterDetail> => {
     const response = await apiClient.patch<{ chapter: API.ChapterDetail }>(

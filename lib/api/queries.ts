@@ -174,7 +174,7 @@ export const useBookMutation = {
   /**
    * Create book mutation
    */
-  useCreateBook: (options?: UseMutationOptions<API.BookDetail, unknown, any>) => {
+  useCreateBook: (options?: UseMutationOptions<API.CreateBookResponse, unknown, any>) => {
     const queryClient = useQueryClient();
     return useMutation({
       mutationFn: (data: any) => booksAPI.createBook(data),

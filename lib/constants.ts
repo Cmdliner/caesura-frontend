@@ -15,6 +15,7 @@ export const ENDPOINTS = {
   // Books
   BOOKS: {
     LIST: '/books',
+    SEARCH: '/books/search',
     GET: (slug: string) => `/books/${slug}`,
     CREATE: '/books',
     UPDATE: (id: string) => `/books/${id}`,
@@ -26,6 +27,7 @@ export const ENDPOINTS = {
     GET: (bookId: string, chapterNumber: number) => `/books/${bookId}/chapters/${chapterNumber}`,
     CREATE: (bookId: string) => `/books/${bookId}/chapters`,
     UPDATE: (bookId: string, chapterId: string) => `/books/${bookId}/chapters/${chapterId}`,
+    DELETE: (bookId: string, chapterId: string) => `/books/${bookId}/chapters/${chapterId}`,
   },
   // Progress
   PROGRESS: {

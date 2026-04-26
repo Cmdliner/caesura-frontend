@@ -3,191 +3,228 @@
 import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
-import AppHeader from "@/components/layout/app-header";
 import StoryEditor from "@/components/editor/story-editor";
 import { booksAPI } from "@/lib/api/books";
+import { useAuth } from "@/app/providers/auth-provider";
+
+function extractWordCount(doc: Record<string, unknown> | null): number {
+  if (!doc) return 0;
+  let text = "";
+  function traverse(node: any) {
+    if (typeof node.text === "string") text += node.text + " ";
+    if (Array.isArray(node.content)) node.content.forEach(traverse);
+  }
+  traverse(doc);
+  return text.trim().split(/\s+/).filter(Boolean).length;
+}
+
+function formatWords(n: number) {
+  if (n >= 1000) return `${(n / 1000).toFixed(1).replace(/\.0$/, "")}k`;
+  return `${n}`;
+}
 
 export default function WriteChapterPage() {
   const router = useRouter();
   const params = useParams();
   const bookSlug = params?.bookId as string;
-  const chapterId = params?.chapterId as string;
+  const chapterParam = params?.chapterId as string;
+  const isNew = chapterParam === "new";
+  const chapterNumber = isNew ? null : parseInt(chapterParam) || null;
+  const { isAuthenticated, isLoading: authLoading } = useAuth();
 
   const [book, setBook] = useState<API.BookDetail | null>(null);
+  const [existingChapterId, setExistingChapterId] = useState<string | null>(null);
   const [chapterTitle, setChapterTitle] = useState("");
-  const [chapterContent, setChapterContent] = useState<any>(null);
-  const [chapterHtml, setChapterHtml] = useState("");
-  const [errors, setErrors] = useState<Record<string, string>>({});
-  const [isLoading, setIsLoading] = useState(false);
+  const [chapterContent, setChapterContent] = useState<Record<string, unknown> | null>(null);
+  const [wordCount, setWordCount] = useState(0);
+  const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
 
-  // Load book on mount
   useEffect(() => {
-    if (bookSlug) {
-      booksAPI
-        .getAuthoredBook(bookSlug)
-        .then(setBook)
-        .catch((err) => {
-          setErrors({submit: err?.message || "Failed to load story"});
-        })
-        .finally(() => setIsLoading(false));
-    }
-  }, [bookSlug]);
+    if (!authLoading && !isAuthenticated) router.push("/login");
+  }, [isAuthenticated, authLoading, router]);
 
-  const validateForm = () => {
-    const newErrors: Record<string, string> = {};
+  useEffect(() => {
+    if (!bookSlug) return;
+    setIsLoading(true);
+    booksAPI
+      .getAuthoredBook(bookSlug)
+      .then(async (loadedBook) => {
+        setBook(loadedBook);
+        if (!isNew && chapterNumber) {
+          try {
+            const chapter = await booksAPI.getAuthoredChapter(loadedBook.id, chapterNumber);
+            setExistingChapterId(chapter.id);
+            setChapterTitle(chapter.title || "");
+            if (chapter.content) {
+              const content = chapter.content as Record<string, unknown>;
+              setChapterContent(content);
+              setWordCount(extractWordCount(content));
+            }
+          } catch {
+            setError("Failed to load chapter content.");
+          }
+        }
+      })
+      .catch((err) => setError(err?.message || "Failed to load story"))
+      .finally(() => setIsLoading(false));
+  }, [bookSlug, isNew, chapterNumber]);
 
-    if (!chapterContent) {
-      newErrors.content = "Chapter content is required";
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+  const handleContentChange = (content: Record<string, unknown>) => {
+    setChapterContent(content);
+    setWordCount(extractWordCount(content));
+    setSaved(false);
   };
 
-  const handleSaveChapter = async (e: React.FormEvent, publish = false) => {
-    e.preventDefault();
+  const handleSave = async (e?: React.FormEvent) => {
+    e?.preventDefault();
+    if (!book) return;
 
-    if (!validateForm()) {
+    if (!chapterContent) {
+      setError("Please write something before saving.");
       return;
     }
 
-    setIsLoading(true);
+    setIsSaving(true);
+    setError("");
+    const wc = extractWordCount(chapterContent);
     try {
-      const nextChapterNumber = (book?.chapters?.length || 0) + 1;
-      await booksAPI.createChapter(book!.id, {
-        chapter_number: nextChapterNumber,
-        title: chapterTitle.trim() || undefined,
-        content: chapterContent,
-      });
-
-      // Navigate back to book view
-      router.push(`/write/${bookSlug}`);
-    } catch (error: any) {
-      setErrors({
-        submit:
-          error?.response?.data?.message ||
-          error?.message ||
-          "Failed to save chapter",
-      });
+      if (isNew) {
+        const nextNumber = (book.chapters?.length || 0) + 1;
+        await booksAPI.createChapter(book.id, {
+          chapter_number: nextNumber,
+          title: chapterTitle.trim() || undefined,
+          content: chapterContent,
+          word_count: wc,
+        });
+      } else if (existingChapterId) {
+        await booksAPI.updateChapter(book.id, existingChapterId, {
+          title: chapterTitle.trim() || undefined,
+          content: chapterContent,
+          word_count: wc,
+        });
+      }
+      setSaved(true);
+      setTimeout(() => router.push(`/write/${bookSlug}`), 600);
+    } catch (err: any) {
+      setError(
+        err?.response?.data?.error || err?.message || "Failed to save chapter"
+      );
     } finally {
-      setIsLoading(false);
+      setIsSaving(false);
     }
   };
 
-  if (!book) {
+  const displayNumber = isNew ? (book?.chapters?.length || 0) + 1 : chapterNumber;
+
+  // ── Loading ──────────────────────────────────────────────────────────────
+  if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-white to-zinc-50">
-        <AppHeader showBackButton onBack={() => router.back()} />
-        <main className="pt-24 pb-16 flex items-center justify-center">
-          <div className="text-center">
-            <div className="inline-flex h-8 w-8 animate-spin rounded-full border-4 border-zinc-300 border-t-orange-500" />
-            <p className="mt-4 text-zinc-600">Loading story...</p>
-          </div>
-        </main>
+      <div className="min-h-screen bg-zinc-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-flex h-8 w-8 animate-spin rounded-full border-[3px] border-zinc-200 border-t-zinc-700" />
+          <p className="mt-4 text-sm text-zinc-400">Loading…</p>
+        </div>
       </div>
     );
   }
 
-  const nextChapterNumber = (book.chapters?.length || 0) + 1;
+  // ── Error / not found ────────────────────────────────────────────────────
+  if (!book) {
+    return (
+      <div className="min-h-screen bg-zinc-50 flex items-center justify-center px-4">
+        <div className="rounded-2xl bg-white border border-zinc-200 p-8 text-center max-w-sm shadow-sm">
+          <p className="text-zinc-700 font-semibold">{error || "Story not found"}</p>
+          <Link href="/write" className="mt-4 inline-block text-sm text-zinc-500 hover:text-zinc-800 underline-offset-2 hover:underline">
+            ← Back to writing
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
+  // ── Editor ───────────────────────────────────────────────────────────────
   return (
-    <div className="min-h-screen bg-gradient-to-b from-white to-zinc-50">
-      <AppHeader showBackButton onBack={() => router.back()} />
+    <div className="min-h-screen bg-zinc-50">
+      {/* ── Top bar ──────────────────────────────────────────────────── */}
+      <header className="fixed top-0 inset-x-0 z-20 h-14 flex items-center justify-between px-4 sm:px-6 bg-white border-b border-zinc-200 shadow-sm">
+        {/* Left: back link */}
+        <Link
+          href={`/write/${bookSlug}`}
+          className="inline-flex items-center gap-1.5 text-sm text-zinc-500 hover:text-zinc-900 transition-colors"
+        >
+          <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+          </svg>
+          <span className="hidden sm:inline max-w-[180px] truncate">{book.title}</span>
+          <span className="sm:hidden">Back</span>
+        </Link>
 
-      <main className="pt-24 pb-16">
-        <div className="mx-auto max-w-4xl px-4 sm:px-6">
-          {/* Page Header */}
-          <div className="mb-8">
-            <Link
-              href={`/write/${bookSlug}`}
-              className="text-sm text-zinc-500 hover:text-orange-600 transition-colors mb-4 inline-flex items-center gap-1"
-            >
-              <svg
-                className="h-4 w-4"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M15 19l-7-7 7-7"
-                />
-              </svg>
-              Back to {book.title}
-            </Link>
+        {/* Centre: chapter label */}
+        <span className="absolute left-1/2 -translate-x-1/2 text-[13px] font-semibold text-zinc-500 pointer-events-none">
+          {isNew ? "New chapter" : `Chapter ${displayNumber}`}
+        </span>
 
-            <h1 className="text-3xl font-extrabold text-zinc-900 sm:text-4xl">
-              Chapter {nextChapterNumber}
-            </h1>
-            <p className="mt-2 text-zinc-600">
-              {book.title}
-            </p>
-          </div>
+        {/* Right: word count + save */}
+        <div className="flex items-center gap-3">
+          {wordCount > 0 && (
+            <span className="hidden sm:block text-[12px] text-zinc-400 tabular-nums">
+              {formatWords(wordCount)} words
+            </span>
+          )}
+          <button
+            type="button"
+            onClick={handleSave}
+            disabled={isSaving || saved}
+            className={`cursor-pointer px-4 py-1.5 rounded-lg text-[13px] font-semibold transition-all active:scale-[0.97] disabled:cursor-not-allowed ${
+              saved
+                ? "bg-emerald-500 text-white"
+                : "bg-zinc-900 text-white hover:bg-zinc-700 disabled:opacity-50"
+            }`}
+          >
+            {saved ? "Saved ✓" : isSaving ? "Saving…" : isNew ? "Save" : "Update"}
+          </button>
+        </div>
+      </header>
 
-          {/* Error Messages */}
-          {errors.submit && (
-            <div className="mb-6 rounded-lg bg-red-50 border border-red-200 p-4">
-              <p className="text-sm text-red-700">{errors.submit}</p>
+      {/* ── Main content ─────────────────────────────────────────────── */}
+      <main className="pt-14 pb-20">
+        <div className="mx-auto max-w-3xl px-4 sm:px-6 py-10">
+
+          {/* Error banner */}
+          {error && (
+            <div className="mb-6 rounded-xl bg-red-50 border border-red-200 px-4 py-3">
+              <p className="text-sm text-red-700">{error}</p>
             </div>
           )}
 
-          {/* Chapter Form */}
-          <form onSubmit={(e) => handleSaveChapter(e, false)} className="space-y-8">
-            {/* Chapter Title */}
-            <div className="space-y-3">
-              <label
-                htmlFor="title"
-                className="block text-sm font-semibold text-zinc-900"
-              >
-                Chapter Title (Optional)
-              </label>
-              <input
-                type="text"
-                id="title"
-                value={chapterTitle}
-                onChange={(e) => setChapterTitle(e.target.value)}
-                placeholder={`e.g., "The Beginning" or leave blank for "Chapter ${nextChapterNumber}"`}
-                className="w-full px-4 py-3 rounded-lg border border-zinc-200 bg-white text-lg transition-colors focus:border-orange-400 focus:ring-1 focus:ring-orange-100 focus:outline-none"
-                disabled={isLoading}
-              />
-            </div>
+          {/* Chapter title input — part of the document feel */}
+          <input
+            type="text"
+            value={chapterTitle}
+            onChange={(e) => { setChapterTitle(e.target.value); setSaved(false); }}
+            placeholder={`Chapter ${displayNumber} title (optional)`}
+            className="w-full mb-6 text-2xl sm:text-3xl font-bold text-zinc-900 placeholder:text-zinc-300 bg-transparent border-none outline-none focus:outline-none resize-none"
+            disabled={isSaving}
+          />
 
-            {/* Content Editor */}
-            <div className="space-y-3">
-              <label className="block text-sm font-semibold text-zinc-900">
-                Chapter Content *
-              </label>
-                <StoryEditor
-                initialContent={chapterContent}
-                onChange={setChapterContent}
-                onHtmlChange={setChapterHtml}
-                disabled={isLoading}
-                placeholder="Start writing your chapter here... Use the toolbar to format your text."
-              />
-              {errors.content && (
-                <p className="text-sm text-red-600">{errors.content}</p>
-              )}
-            </div>
+          {/* Rich text editor */}
+          <StoryEditor
+            initialContent={chapterContent}
+            onChange={handleContentChange}
+            onHtmlChange={() => {}}
+            disabled={isSaving}
+            placeholder="Start writing your chapter here…"
+          />
 
-            {/* Action Buttons */}
-            <div className="flex flex-wrap gap-3">
-              <button
-                type="submit"
-                disabled={isLoading}
-                className="px-6 py-3 rounded-lg bg-orange-500 text-white font-semibold hover:bg-orange-600 disabled:bg-zinc-300 disabled:cursor-not-allowed transition-colors"
-              >
-                {isLoading ? "Saving..." : "Save Chapter"}
-              </button>
-              <Link
-                href={`/write/${bookSlug}`}
-                className="px-6 py-3 rounded-lg border border-zinc-200 bg-white text-zinc-900 font-semibold hover:bg-zinc-50 transition-colors"
-              >
-                Cancel
-              </Link>
-            </div>
-          </form>
+          {/* Mobile word count */}
+          {wordCount > 0 && (
+            <p className="sm:hidden mt-3 text-right text-[12px] text-zinc-400 tabular-nums">
+              {formatWords(wordCount)} words
+            </p>
+          )}
         </div>
       </main>
     </div>

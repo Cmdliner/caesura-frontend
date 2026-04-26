@@ -86,12 +86,22 @@ declare global {
       status: string;
       cover_url?: string;
       created_at: string;
+      updated_at: string;
+      chapter_count: number;
+      total_word_count: number;
     }
 
     interface ProgressSummary {
       chapter_id: string;
+      chapter_number: number;
       scroll_position: number;
       last_read_at: string;
+    }
+
+    interface CreateBookResponse {
+      book_id: string;
+      title: string;
+      slug: string;
     }
 
     interface LibraryItem {
@@ -117,10 +127,15 @@ declare global {
 
     interface PagedResponse<T> {
       items: T[];
-      total_count: number;
-      page_size: number;
-      current_page: number;
+      /** 1-based current page */
+      page: number;
+      /** Items per page */
+      limit: number;
+      /** Total item count across all pages */
+      total: number;
+      /** Computed: Math.ceil(total / limit) */
       total_pages: number;
+      has_more: boolean;
     }
 
     interface UpdateProgressRequest {

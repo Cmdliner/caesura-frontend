@@ -3,38 +3,37 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import AppHeader from "@/components/layout/app-header";
+import AppNav from "@/components/layout/app-nav";
 import { booksAPI } from "@/lib/api/books";
+import { useAuth } from "@/app/providers/auth-provider";
 
 export default function CreateStoryPage() {
   const router = useRouter();
-  const [step, setStep] = useState<"create" | "chapters">("create");
+  const { isAuthenticated, isLoading: authLoading } = useAuth();
+  const [step, setStep] = useState<"create" | "done">("create");
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [authors, setAuthors] = useState<string[]>([]);
   const [authorInput, setAuthorInput] = useState("");
-  const [genreIds, setGenreIds] = useState<number[]>([]);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(false);
-  const [createdBook, setCreatedBook] = useState<API.BookDetail | null>(null);
+  const [createdBook, setCreatedBook] = useState<API.CreateBookResponse | null>(null);
+
+  useEffect(() => {
+    if (!authLoading && !isAuthenticated) router.push("/login");
+  }, [isAuthenticated, authLoading, router]);
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
-
-    if (!title.trim()) {
-      newErrors.title = "Story title is required";
-    }
-
+    if (!title.trim()) newErrors.title = "Story title is required";
+    if (description.length > 500) newErrors.description = "Keep it under 500 characters";
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const handleCreateBook = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    if (!validateForm()) {
-      return;
-    }
+    if (!validateForm()) return;
 
     setIsLoading(true);
     try {
@@ -43,14 +42,13 @@ export default function CreateStoryPage() {
         description: description.trim() || undefined,
         language: "en",
         authors: authors.length > 0 ? authors : undefined,
-        genre_ids: genreIds.length > 0 ? genreIds : undefined,
       });
       setCreatedBook(book);
-      setStep("chapters");
+      setStep("done");
     } catch (error: any) {
       setErrors({
         submit:
-          error?.response?.data?.message ||
+          error?.response?.data?.error ||
           error?.message ||
           "Failed to create story",
       });
@@ -60,9 +58,9 @@ export default function CreateStoryPage() {
   };
 
   const handleAddAuthor = () => {
-    const trimmedAuthor = authorInput.trim();
-    if (trimmedAuthor && !authors.includes(trimmedAuthor)) {
-      setAuthors([...authors, trimmedAuthor]);
+    const trimmed = authorInput.trim();
+    if (trimmed && !authors.includes(trimmed)) {
+      setAuthors([...authors, trimmed]);
       setAuthorInput("");
     }
   };
@@ -71,330 +69,229 @@ export default function CreateStoryPage() {
     setAuthors(authors.filter((_, i) => i !== index));
   };
 
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="inline-flex h-8 w-8 animate-spin rounded-full border-[3px] border-zinc-200 border-t-zinc-700" />
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-gradient-to-b from-white to-zinc-50">
-      <AppHeader showBackButton onBack={() => router.back()} />
+    <div className="min-h-screen bg-white">
+      <AppNav />
 
-      <main className="pt-24 pb-16">
-        <div className="mx-auto max-w-4xl px-4 sm:px-6">
-          {step === "create" ? (
-            <>
-              {/* Page Header */}
-              <div className="mb-8">
-                <Link
-                  href="/profile"
-                  className="text-sm text-zinc-500 hover:text-orange-600 transition-colors mb-4 inline-flex items-center gap-1"
-                >
-                  <svg
-                    className="h-4 w-4"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M15 19l-7-7 7-7"
-                    />
-                  </svg>
-                  Back to Profile
-                </Link>
+      <main className="pt-[60px]">
+        {step === "create" ? (
+          <div className="mx-auto max-w-2xl px-4 sm:px-6 py-12">
+            {/* Page header */}
+            <div className="mb-10">
+              <Link
+                href="/write"
+                className="inline-flex items-center gap-1 text-[13px] text-zinc-400 hover:text-zinc-700 transition-colors mb-6"
+              >
+                <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+                Back to writing
+              </Link>
+              <h1 className="text-[28px] sm:text-[34px] font-extrabold text-zinc-900 tracking-tight leading-tight">
+                Start a new story
+              </h1>
+              <p className="mt-2 text-[15px] text-zinc-500">
+                Set up the basics — you can always edit these later.
+              </p>
+            </div>
 
-                <h1 className="text-4xl font-extrabold text-zinc-900 sm:text-5xl">
-                  Create a New Story
-                </h1>
-                <p className="mt-2 text-lg text-zinc-600">
-                  Start your writing journey. You'll add chapters after creating your story.
-                </p>
+            {errors.submit && (
+              <div className="mb-8 rounded-xl bg-red-50 border border-red-100 px-4 py-3">
+                <p className="text-sm text-red-700">{errors.submit}</p>
               </div>
+            )}
 
-              {/* Error Messages */}
-              {errors.submit && (
-                <div className="mb-6 rounded-lg bg-red-50 border border-red-200 p-4">
-                  <p className="text-sm text-red-700">{errors.submit}</p>
-                </div>
-              )}
-
-              {/* Story Info Form */}
-              <form onSubmit={handleCreateBook} className="space-y-8 max-w-2xl">
-                {/* Title Section */}
-                <div className="space-y-3">
-                  <label
-                    htmlFor="title"
-                    className="block text-sm font-semibold text-zinc-900"
-                  >
-                    Story Title *
-                  </label>
-                  <input
-                    type="text"
-                    id="title"
-                    value={title}
-                    onChange={(e) => {
-                      setTitle(e.target.value);
-                      if (errors.title) {
-                        setErrors((prev) => ({ ...prev, title: "" }));
-                      }
-                    }}
-                    placeholder="Enter your story title..."
-                    className={`w-full px-4 py-3 rounded-lg border text-lg font-medium transition-colors ${
-                      errors.title
-                        ? "border-red-300 bg-red-50 focus:border-red-400 focus:ring-1 focus:ring-red-100"
-                        : "border-zinc-200 bg-white focus:border-orange-400 focus:ring-1 focus:ring-orange-100"
-                    } focus:outline-none`}
-                    disabled={isLoading}
-                  />
-                  {errors.title && (
-                    <p className="text-sm text-red-600">{errors.title}</p>
-                  )}
-                </div>
-
-                {/* Description Section */}
-                <div className="space-y-3">
-                  <label
-                    htmlFor="description"
-                    className="block text-sm font-semibold text-zinc-900"
-                  >
-                    Description (Optional)
-                  </label>
-                  <textarea
-                    id="description"
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                    placeholder="A brief summary of your story... What readers should know before diving in."
-                    rows={4}
-                    className="w-full px-4 py-3 rounded-lg border border-zinc-200 bg-white text-sm transition-colors focus:border-orange-400 focus:ring-1 focus:ring-orange-100 focus:outline-none resize-none"
-                    disabled={isLoading}
-                  />
-                  <p className="text-xs text-zinc-500">
-                    {description.length}/500 characters
-                  </p>
-                </div>
-
-                {/* Authors Section */}
-                <div className="space-y-3">
-                  <label className="block text-sm font-semibold text-zinc-900">
-                    Additional Authors (Optional)
-                  </label>
-                  <div className="flex gap-2">
-                    <input
-                      type="text"
-                      value={authorInput}
-                      onChange={(e) => setAuthorInput(e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") {
-                          e.preventDefault();
-                          handleAddAuthor();
-                        }
-                      }}
-                      placeholder="Enter author name and press Enter..."
-                      className="flex-1 px-4 py-3 rounded-lg border border-zinc-200 bg-white text-sm transition-colors focus:border-orange-400 focus:ring-1 focus:ring-orange-100 focus:outline-none"
-                      disabled={isLoading}
-                    />
-                    <button
-                      type="button"
-                      onClick={handleAddAuthor}
-                      className="px-4 py-3 rounded-lg bg-zinc-100 text-zinc-700 text-sm font-semibold hover:bg-zinc-200 transition-colors disabled:opacity-50"
-                      disabled={isLoading || !authorInput.trim()}
-                    >
-                      Add
-                    </button>
-                  </div>
-                  {authors.length > 0 && (
-                    <div className="flex flex-wrap gap-2 mt-3">
-                      {authors.map((author, index) => (
-                        <div
-                          key={index}
-                          className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-orange-100 text-orange-700 text-sm font-medium"
-                        >
-                          {author}
-                          <button
-                            type="button"
-                            onClick={() => handleRemoveAuthor(index)}
-                            className="ml-1 hover:text-orange-900 transition-colors"
-                          >
-                            ×
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                  <p className="text-xs text-zinc-500">
-                    Add co-authors or collaborators to your story. You can add up to 5 authors.
-                  </p>
-                </div>
-                <div className="rounded-lg border border-blue-200 bg-blue-50 p-4">
-                  <div className="flex gap-3">
-                    <svg
-                      className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5"
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M18 5v8a2 2 0 01-2 2h-5l-5 4v-4H4a2 2 0 01-2-2V5a2 2 0 012-2h12a2 2 0 012 2zm-11-1a1 1 0 11-2 0 1 1 0 012 0z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                    <div>
-                      <p className="font-medium text-blue-900">Chapter-based writing</p>
-                      <p className="text-sm text-blue-700 mt-1">
-                        After creating your story, you'll add chapters one by one. Each chapter can have
-                        its own title and rich formatted content.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Submit Button */}
-                <div className="flex gap-3">
-                  <button
-                    type="submit"
-                    disabled={isLoading}
-                    className="px-6 py-3 rounded-lg bg-orange-500 text-white font-semibold hover:bg-orange-600 disabled:bg-zinc-300 disabled:cursor-not-allowed transition-colors"
-                  >
-                    {isLoading ? "Creating..." : "Create Story"}
-                  </button>
-                  <Link
-                    href="/profile"
-                    className="px-6 py-3 rounded-lg border border-zinc-200 bg-white text-zinc-900 font-semibold hover:bg-zinc-50 transition-colors"
-                  >
-                    Cancel
-                  </Link>
-                </div>
-              </form>
-            </>
-          ) : createdBook ? (
-            <>
-              {/* Story Created - Chapters Step */}
-              <div className="mb-8">
-                <button
-                  onClick={() => setStep("create")}
-                  className="text-sm text-zinc-500 hover:text-orange-600 transition-colors mb-4 inline-flex items-center gap-1"
-                >
-                  <svg
-                    className="h-4 w-4"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M15 19l-7-7 7-7"
-                    />
-                  </svg>
-                  Back to Story Info
-                </button>
-
-                <h1 className="text-4xl font-extrabold text-zinc-900 sm:text-5xl">
-                  {createdBook.title}
-                </h1>
-                {createdBook.description && (
-                  <p className="mt-2 text-lg text-zinc-600">
-                    {createdBook.description}
-                  </p>
+            <form onSubmit={handleCreateBook} className="space-y-7">
+              {/* Title */}
+              <div className="space-y-1.5">
+                <label htmlFor="title" className="block text-[13px] font-semibold text-zinc-700">
+                  Title <span className="text-red-400">*</span>
+                </label>
+                <input
+                  type="text"
+                  id="title"
+                  value={title}
+                  onChange={(e) => {
+                    setTitle(e.target.value);
+                    if (errors.title) setErrors((prev) => ({ ...prev, title: "" }));
+                  }}
+                  placeholder="Give your story a title…"
+                  className={`w-full px-4 py-3 rounded-xl border text-[15px] font-medium text-zinc-900 placeholder:text-zinc-300 bg-white outline-none transition-all ${
+                    errors.title
+                      ? "border-red-300 ring-1 ring-red-200"
+                      : "border-zinc-200 focus:border-zinc-400 focus:ring-1 focus:ring-zinc-100"
+                  }`}
+                  disabled={isLoading}
+                  autoFocus
+                />
+                {errors.title && (
+                  <p className="text-[12px] text-red-500 mt-1">{errors.title}</p>
                 )}
               </div>
 
-              {/* Success Message */}
-              <div className="mb-8 rounded-lg border border-green-200 bg-green-50 p-4">
-                <div className="flex gap-3">
-                  <svg
-                    className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                  <div>
-                    <p className="font-medium text-green-900">
-                      Story created successfully!
-                    </p>
-                    <p className="text-sm text-green-700 mt-1">
-                      Now you can start adding chapters to your story.
-                    </p>
-                  </div>
+              {/* Description */}
+              <div className="space-y-1.5">
+                <div className="flex items-baseline justify-between">
+                  <label htmlFor="description" className="block text-[13px] font-semibold text-zinc-700">
+                    Description
+                    <span className="ml-1.5 text-[11px] font-normal text-zinc-400">(optional)</span>
+                  </label>
+                  <span className={`text-[11px] tabular-nums ${description.length > 480 ? "text-red-400" : "text-zinc-300"}`}>
+                    {description.length}/500
+                  </span>
                 </div>
+                <textarea
+                  id="description"
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  placeholder="A short summary of what your story is about…"
+                  rows={4}
+                  className={`w-full px-4 py-3 rounded-xl border text-[14px] text-zinc-900 placeholder:text-zinc-300 bg-white outline-none resize-none transition-all ${
+                    errors.description
+                      ? "border-red-300 ring-1 ring-red-200"
+                      : "border-zinc-200 focus:border-zinc-400 focus:ring-1 focus:ring-zinc-100"
+                  }`}
+                  disabled={isLoading}
+                />
+                {errors.description && (
+                  <p className="text-[12px] text-red-500">{errors.description}</p>
+                )}
               </div>
 
-              {/* Chapters Section */}
-              <div className="space-y-6">
-                <div>
-                  <h2 className="text-2xl font-bold text-zinc-900 mb-4">
-                    Chapters ({createdBook.chapters?.length || 0})
-                  </h2>
-
-                  {createdBook.chapters && createdBook.chapters.length > 0 ? (
-                    <div className="space-y-3">
-                      {createdBook.chapters.map((chapter) => (
-                        <div
-                          key={chapter.id}
-                          className="flex items-center justify-between p-4 rounded-lg border border-zinc-200 hover:border-orange-300 transition-colors"
+              {/* Co-authors */}
+              <div className="space-y-1.5">
+                <label className="block text-[13px] font-semibold text-zinc-700">
+                  Co-authors
+                  <span className="ml-1.5 text-[11px] font-normal text-zinc-400">(optional)</span>
+                </label>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={authorInput}
+                    onChange={(e) => setAuthorInput(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") { e.preventDefault(); handleAddAuthor(); }
+                    }}
+                    placeholder="Name, then press Enter…"
+                    className="flex-1 px-4 py-3 rounded-xl border border-zinc-200 text-[14px] text-zinc-900 placeholder:text-zinc-300 bg-white outline-none transition-all focus:border-zinc-400 focus:ring-1 focus:ring-zinc-100"
+                    disabled={isLoading}
+                  />
+                  <button
+                    type="button"
+                    onClick={handleAddAuthor}
+                    disabled={isLoading || !authorInput.trim()}
+                    className="cursor-pointer px-4 py-3 rounded-xl border border-zinc-200 text-[13px] font-semibold text-zinc-700 hover:bg-zinc-50 hover:border-zinc-300 active:scale-95 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                  >
+                    Add
+                  </button>
+                </div>
+                {authors.length > 0 && (
+                  <div className="flex flex-wrap gap-2 pt-1">
+                    {authors.map((author, index) => (
+                      <span
+                        key={index}
+                        className="inline-flex items-center gap-1.5 pl-3 pr-2 py-1 rounded-full border border-zinc-200 bg-zinc-50 text-[12px] font-semibold text-zinc-700"
+                      >
+                        {author}
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveAuthor(index)}
+                          className="cursor-pointer h-4 w-4 rounded-full flex items-center justify-center hover:bg-zinc-200 text-zinc-400 hover:text-zinc-700 transition-colors"
                         >
-                          <div>
-                            <p className="font-semibold text-zinc-900">
-                              Chapter {chapter.chapter_number}: {chapter.title || "Untitled"}
-                            </p>
-                            <p className="text-sm text-zinc-600 mt-1">
-                              {chapter.word_count || 0} words
-                            </p>
-                          </div>
-                          <Link
-                            href={`/write/${createdBook.id}/chapter/${chapter.chapter_number}`}
-                            className="px-4 py-2 rounded-lg bg-orange-100 text-orange-600 font-medium hover:bg-orange-200 transition-colors"
-                          >
-                            Edit
-                          </Link>
-                        </div>
-                      ))}
-                    </div>
+                          <svg className="h-2.5 w-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                        </button>
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Hint */}
+              <div className="rounded-xl border border-zinc-100 bg-zinc-50 px-4 py-3.5 flex gap-3">
+                <svg className="h-4 w-4 text-zinc-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
+                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <p className="text-[13px] text-zinc-500 leading-relaxed">
+                  After creating your story you&apos;ll add chapters one by one — each with its own title and rich formatted content.
+                </p>
+              </div>
+
+              {/* Actions */}
+              <div className="flex gap-3 pt-1">
+                <button
+                  type="submit"
+                  disabled={isLoading}
+                  className="cursor-pointer flex items-center gap-2 px-6 py-2.5 rounded-xl bg-zinc-900 text-white text-[13px] font-semibold hover:bg-zinc-700 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isLoading ? (
+                    <>
+                      <span className="inline-flex h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+                      Creating…
+                    </>
                   ) : (
-                    <p className="text-zinc-600 mb-4">
-                      No chapters yet. Create your first one to start writing!
-                    </p>
+                    "Create story"
                   )}
-                </div>
-
-                {/* Add Chapter Button */}
+                </button>
                 <Link
-                  href={`/write/${createdBook.slug}/chapters`}
-                  className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg bg-orange-500 text-white font-semibold hover:bg-orange-600 transition-colors"
+                  href="/write"
+                  className="inline-flex items-center px-6 py-2.5 rounded-xl border border-zinc-200 text-zinc-600 text-[13px] font-semibold hover:bg-zinc-50 hover:border-zinc-300 active:scale-95 transition-all"
                 >
-                  <svg
-                    className="h-5 w-5"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M12 4v16m8-8H4"
-                    />
-                  </svg>
-                  Add New Chapter
+                  Cancel
                 </Link>
               </div>
-
-              {/* Navigation */}
-              <div className="mt-8 flex gap-3">
-                <Link
-                  href="/profile"
-                  className="px-6 py-3 rounded-lg border border-zinc-200 bg-white text-zinc-900 font-semibold hover:bg-zinc-50 transition-colors"
-                >
-                  Go to Profile
-                </Link>
+            </form>
+          </div>
+        ) : createdBook ? (
+          <div className="mx-auto max-w-2xl px-4 sm:px-6 py-12">
+            {/* Success state */}
+            <div className="mb-8 flex items-center gap-3">
+              <div className="h-10 w-10 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0">
+                <svg className="h-5 w-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
               </div>
-            </>
-          ) : null}
-        </div>
+              <div>
+                <p className="text-[12px] font-semibold uppercase tracking-widest text-emerald-600">Story created</p>
+                <h1 className="text-[24px] font-extrabold text-zinc-900 leading-tight tracking-tight mt-0.5">
+                  {createdBook.title}
+                </h1>
+              </div>
+            </div>
+
+            <p className="text-[15px] text-zinc-500 mb-8">
+              Your story is ready. Write your first chapter to bring it to life.
+            </p>
+
+            <div className="flex flex-col sm:flex-row gap-3">
+              <Link
+                href={`/write/${createdBook.slug}/chapter/new`}
+                className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-zinc-900 text-white text-[13px] font-semibold hover:bg-zinc-700 active:scale-95 transition-all"
+              >
+                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                </svg>
+                Write first chapter
+              </Link>
+              <Link
+                href={`/write/${createdBook.slug}`}
+                className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl border border-zinc-200 text-zinc-700 text-[13px] font-semibold hover:bg-zinc-50 hover:border-zinc-300 active:scale-95 transition-all"
+              >
+                Story dashboard
+              </Link>
+            </div>
+          </div>
+        ) : null}
       </main>
     </div>
   );

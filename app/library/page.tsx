@@ -86,13 +86,13 @@ export default function LibraryPage() {
                   onClick={() => setFilter(f.id)}
                   className={`relative px-2 sm:px-4 py-3 text-[12px] sm:text-[13.5px] font-semibold transition-colors whitespace-nowrap flex-shrink-0 ${
                     filter === f.id
-                      ? "text-zinc-900 border-b-[2.5px] border-orange-500"
+                      ? "text-zinc-900 border-b-[2.5px] border-zinc-900"
                       : "text-zinc-500 hover:text-zinc-800 border-b-[2.5px] border-transparent"
                   }`}
                 >
                   {f.label}
                   {counts[f.id] > 0 && (
-                    <span className={`ml-1.5 text-[11px] font-medium ${filter === f.id ? "text-orange-500" : "text-zinc-400"}`}>
+                    <span className={`ml-1.5 text-[11px] font-medium ${filter === f.id ? "text-zinc-900" : "text-zinc-400"}`}>
                       {counts[f.id]}
                     </span>
                   )}
@@ -154,7 +154,7 @@ export default function LibraryPage() {
               <p className="text-zinc-400 text-xs mt-1">Discover and save stories to read them here</p>
               <Link
                 href="/discover"
-                className="mt-5 inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-orange-500 text-white text-sm font-semibold hover:bg-orange-600 transition-colors"
+                className="mt-5 inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-zinc-800 text-white text-sm font-semibold hover:bg-zinc-700 transition-colors"
               >
                 Browse stories
               </Link>
@@ -178,15 +178,15 @@ export default function LibraryPage() {
                         loading="lazy"
                       />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-orange-100 via-amber-50 to-orange-50 px-3 text-center">
-                        <span className="text-xs font-semibold text-orange-400 line-clamp-3 leading-tight">{book.title}</span>
+                      <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-zinc-100 to-zinc-200 px-3 text-center">
+                        <span className="text-xs font-semibold text-zinc-500 line-clamp-3 leading-tight">{book.title}</span>
                       </div>
                     )}
                     {/* Progress badge */}
                     {book.progress && (
                       <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-black/20">
                         <div
-                          className="h-full bg-orange-500"
+                          className="h-full bg-zinc-800"
                           style={{ width: `${book.progress.scroll_position}%` }}
                         />
                       </div>
@@ -202,7 +202,7 @@ export default function LibraryPage() {
                   {/* Metadata */}
                   <div className="min-w-0">
                     <Link href={`/book/${book.slug}`}>
-                      <h3 className="text-[13px] font-semibold text-zinc-900 line-clamp-2 leading-tight hover:text-orange-600 transition-colors">
+                      <h3 className="text-[13px] font-semibold text-zinc-900 line-clamp-2 leading-tight hover:text-zinc-600 transition-colors">
                         {book.title}
                       </h3>
                     </Link>
@@ -230,7 +230,7 @@ export default function LibraryPage() {
                     {book.cover_url ? (
                       <img src={book.cover_url} alt="" className="w-full h-full object-cover" loading="lazy" />
                     ) : (
-                      <div className="w-full h-full bg-gradient-to-br from-orange-100 to-amber-50" />
+                      <div className="w-full h-full bg-gradient-to-br from-zinc-100 to-zinc-200" />
                     )}
                   </div>
 
@@ -240,7 +240,7 @@ export default function LibraryPage() {
                     {book.progress ? (
                       <div className="mt-1.5">
                         <div className="h-1 bg-zinc-100 rounded-full overflow-hidden w-full max-w-[200px]">
-                          <div className="h-full bg-orange-500 rounded-full" style={{ width: `${book.progress.scroll_position}%` }} />
+                          <div className="h-full bg-zinc-800 rounded-full" style={{ width: `${book.progress.scroll_position}%` }} />
                         </div>
                         <p className="text-[11px] text-zinc-400 mt-1">
                           {Math.round(book.progress.scroll_position)}% · {formatLastRead(book.progress.last_read_at)}
@@ -251,7 +251,7 @@ export default function LibraryPage() {
                     )}
                   </div>
 
-                  <span className="flex-shrink-0 text-xs font-semibold text-orange-500 group-hover:underline hidden sm:block">
+                  <span className="flex-shrink-0 text-xs font-semibold text-zinc-900 group-hover:underline hidden sm:block">
                     {book.progress ? "Continue" : "Read"} →
                   </span>
                 </button>
@@ -290,10 +290,10 @@ export default function LibraryPage() {
                     <div className="mb-4 sm:mb-6 p-3 sm:p-4 rounded-lg sm:rounded-xl bg-zinc-50 border border-zinc-100">
                       <div className="flex justify-between items-center mb-2">
                         <span className="text-sm font-semibold text-zinc-900">Reading Progress</span>
-                        <span className="text-sm font-bold text-orange-500">{activeBook.progress.scroll_position}%</span>
+                        <span className="text-sm font-bold text-zinc-900">{activeBook.progress.scroll_position}%</span>
                       </div>
                       <div className="h-2 bg-zinc-200 rounded-full overflow-hidden">
-                        <div className="h-full bg-orange-500 rounded-full" style={{ width: `${activeBook.progress.scroll_position}%` }} />
+                        <div className="h-full bg-zinc-800 rounded-full" style={{ width: `${activeBook.progress.scroll_position}%` }} />
                       </div>
                       <p className="mt-2 text-xs text-zinc-500">Last read {formatLastRead(activeBook.progress.last_read_at)}</p>
                     </div>
@@ -302,7 +302,7 @@ export default function LibraryPage() {
                   <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 mt-auto">
                     <Link
                       href={`/book/${activeBook.slug}`}
-                      className="flex-1 inline-flex items-center justify-center px-4 py-2 sm:py-3 rounded-lg sm:rounded-xl bg-zinc-900 text-white font-semibold text-sm hover:bg-orange-500 transition-colors"
+                      className="flex-1 inline-flex items-center justify-center px-4 py-2 sm:py-3 rounded-lg sm:rounded-xl bg-zinc-900 text-white font-semibold text-sm hover:bg-zinc-800 transition-colors"
                     >
                       Continue Reading
                     </Link>

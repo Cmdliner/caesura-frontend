@@ -53,11 +53,12 @@ export const userManager = {
 };
 
 export const progressManager = {
-  setProgress: (bookId: string, chapterId: string, scrollPosition: number) => {
+  setProgress: (bookId: string, chapterId: string, chapterNumber: number, scrollPosition: number) => {
     if (typeof window !== 'undefined') {
       const progress = progressManager.getAllProgress();
       progress[bookId] = {
         chapter_id: chapterId,
+        chapter_number: chapterNumber,
         scroll_position: scrollPosition,
         timestamp: Date.now(),
       };
@@ -67,7 +68,7 @@ export const progressManager = {
 
   getProgress: (
     bookId: string
-  ): { chapter_id: string; scroll_position: number; timestamp: number } | null => {
+  ): { chapter_id: string; chapter_number: number; scroll_position: number; timestamp: number } | null => {
     if (typeof window !== 'undefined') {
       const progress = progressManager.getAllProgress();
       return progress[bookId] || null;
@@ -75,7 +76,7 @@ export const progressManager = {
     return null;
   },
 
-  getAllProgress: (): Record<string, { chapter_id: string; scroll_position: number; timestamp: number }> => {
+  getAllProgress: (): Record<string, { chapter_id: string; chapter_number: number; scroll_position: number; timestamp: number }> => {
     if (typeof window !== 'undefined') {
       const progress = localStorage.getItem(STORAGE_KEYS.READING_PROGRESS);
       try {
