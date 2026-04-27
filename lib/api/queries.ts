@@ -7,6 +7,7 @@ import {
 } from '@tanstack/react-query';
 import { authAPI } from './auth';
 import { booksAPI } from './books';
+import { genresAPI } from './genres';
 import { storiesAPI } from './stories';
 import { APP_CONFIG } from '@/lib/constants';
 
@@ -147,6 +148,38 @@ export const useBookQueries = {
       gcTime: APP_CONFIG.CACHE_TIME,
       enabled: !!bookId && chapterNumber > 0,
       retry: 1,
+    }),
+};
+
+/**
+ * Genre Query Hooks
+ */
+
+export const useGenreQueries = {
+  /** All genres with book counts (cached 5 min — genres change rarely). */
+  useGenres: (options?: UseQueryOptions<API.Genre[]>) =>
+    useQuery({
+      queryKey: ['genres'],
+      queryFn: () => genresAPI.listGenres(),
+      staleTime: 5 * 60 * 1000,
+      gcTime: 10 * 60 * 1000,
+      placeholderData: [],
+      ...options,
+    }),
+
+  /** Paginated books for a genre. Re-fetches when slug or page changes. */
+  useGenreBooks: (
+    slug: string,
+    page: number = 1,
+    options?: UseQueryOptions<API.PagedResponse<API.BookSummary>>
+  ) =>
+    useQuery({
+      queryKey: ['genre-books', slug, page],
+      queryFn: () => genresAPI.getGenreBooks(slug, page),
+      enabled: !!slug,
+      staleTime: APP_CONFIG.STALE_TIME,
+      gcTime: APP_CONFIG.CACHE_TIME,
+      ...options,
     }),
 };
 

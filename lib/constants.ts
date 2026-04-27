@@ -44,6 +44,11 @@ export const ENDPOINTS = {
     DELETE: (id: string) => `/stories/${id}`,
     PUBLISH: (id: string) => `/stories/${id}/publish`,
   },
+  // Genres
+  GENRES: {
+    LIST: '/genres',
+    BOOKS: (slug: string) => `/genres/${slug}/books`,
+  },
   // Users
   USERS: {
     PROFILE: (username: string) => `/users/${username}/profile`,

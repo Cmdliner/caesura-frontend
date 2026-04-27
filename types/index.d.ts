@@ -32,6 +32,15 @@ declare global {
       id_token: string;
     }
 
+    // Genre Types
+    interface Genre {
+      id: number;
+      name: string;
+      /** URL-safe identifier, e.g. "science-fiction" */
+      slug: string;
+      book_count: number;
+    }
+
     // Book Types
     interface Author {
       id: string;
@@ -62,6 +71,7 @@ declare global {
       author?: Author;
       gutenberg_authors?: string[];
       chapters: ChapterSummary[];
+      genres?: string[];
     }
 
     interface BookSummary {
@@ -76,6 +86,7 @@ declare global {
       status: string;
       total_views: number;
       created_at: string;
+      genres?: string[];
     }
 
     interface AuthoredBook {
