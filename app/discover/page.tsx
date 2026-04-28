@@ -91,7 +91,7 @@ export default function DiscoverPage() {
   const { data: genres = [] } = useGenreQueries.useGenres();
 
   // Books — either all books or genre-filtered
-  const allBooksQuery = useBookQueries.useBooks(page, { enabled: !activeGenre });
+  const allBooksQuery = useBookQueries.useBooks(page);
   const genreBooksQuery = useQuery({
     queryKey: ['genre-books', activeGenre?.slug, page],
     queryFn: () => genresAPI.getGenreBooks(activeGenre!.slug, page),
