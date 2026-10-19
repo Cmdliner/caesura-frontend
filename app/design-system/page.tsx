@@ -13,6 +13,7 @@ import Alert from "@/components/ui/alert";
 import EmptyState, { ErrorState, PageLoader } from "@/components/ui/empty-state";
 import SectionHeading from "@/components/ui/section-heading";
 import { DotPattern, Splash } from "@/components/ui/patterns";
+import WaveDivider from "@/components/ui/wave-divider";
 import { PasswordInput } from "@/components/auth/fields";
 import StoreBadge from "@/components/ui/store-badge";
 import MenuButton from "@/components/layout/menu-button";
@@ -402,6 +403,17 @@ export default function DesignSystemPage() {
             <div className="relative h-32 overflow-hidden rounded-2xl border border-zinc-200 bg-white"><div className="pattern-grid absolute inset-0 text-zinc-200" /><p className="relative p-4 text-sm font-semibold">.pattern-grid</p></div>
             <div className="relative h-32 overflow-hidden rounded-2xl border border-zinc-200 bg-white"><div className="pattern-stripes absolute inset-0 text-zinc-300" /><p className="relative p-4 text-sm font-semibold">.pattern-stripes</p></div>
           </div>
+          <Sub>Wave dividers</Sub>
+          <div className="overflow-hidden rounded-2xl border border-zinc-200">
+            <div className="bg-brand-50 px-6 py-5 text-sm font-semibold text-brand-700">Section above (brand-50)</div>
+            <div className="relative bg-zinc-950 px-6 py-24 text-center text-white">
+              <WaveDivider position="top" variant="a" className="text-brand-50" />
+              <WaveDivider position="bottom" variant="b" className="text-zinc-50" />
+              <p className="relative text-sm font-semibold">Dark band with <code className="font-mono text-xs">WaveDivider</code> top + bottom</p>
+            </div>
+            <div className="bg-zinc-50 px-6 py-5 text-sm font-semibold text-zinc-700">Section below (zinc-50)</div>
+          </div>
+
           <Sub>On dark and on brand</Sub>
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="relative h-44 overflow-hidden rounded-2xl bg-zinc-950">

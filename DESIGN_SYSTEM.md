@@ -52,6 +52,7 @@ Never use raw `orange-*`; use `brand-*`. Never use `bg-black`; use `zinc-950`.
 | Component | What |
 | --- | --- |
 | `Splash` (`variant` a/b/c) | Flat orange paint-splash vector. Tint with `text-brand-*`. Parent must be `relative overflow-hidden` |
+| `WaveDivider` | Wavy section edge. Colour it with the *neighbouring* section's background (`text-brand-50`, `text-zinc-50`...) and give the section extra top/bottom padding. Used on the stats band |
 | `DotPattern` | Dot texture; fade with a `[mask-image:...]` class |
 | `SectionHeading` | Eyebrow + title + description for marketing sections (`tone="dark"` on dark/brand backgrounds) |
 | `PageHero` | Header band for every signed-in page. `compact` = one slim row (title + count inline, filters/actions on the right) for browse/list pages so content starts at the top |
