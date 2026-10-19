@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { BookOpen, Eye, Globe, Users, type LucideIcon } from "lucide-react";
 import SectionHeading from "@/components/ui/section-heading";
 import { DotPattern, Splash } from "@/components/ui/patterns";
+import WaveDivider from "@/components/ui/wave-divider";
 
 type Stat = {
   value: number;
@@ -76,7 +77,11 @@ export default function Stats() {
   );
 
   return (
-    <section ref={sectionRef} className="section bg-zinc-950">
+    <section ref={sectionRef} className="section bg-zinc-950 !pb-32 !pt-32 md:!pb-44 md:!pt-44">
+      {/* Wavy edges: each takes the colour of the neighbouring section (Trending above, Testimonials below) */}
+      <WaveDivider position="top" variant="a" className="text-brand-50" />
+      <WaveDivider position="bottom" variant="b" className="text-zinc-50" />
+
       <Splash variant="a" className="-left-32 -top-40 h-[28rem] w-[28rem] text-brand-600/15" />
       <Splash variant="b" className="-bottom-28 -right-24 h-72 w-[26rem] text-brand-600/10" />
       <DotPattern className="inset-0 text-white/[0.07] [mask-image:radial-gradient(ellipse_at_center,black,transparent_75%)]" />
