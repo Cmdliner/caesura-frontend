@@ -1,6 +1,10 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { ArrowLeft, BookX, Check, Loader2 } from "lucide-react";
+import AppNav from "@/components/layout/app-nav";
+import { toast } from "sonner";
+import EmptyState, { ErrorState, PageLoader } from "@/components/ui/empty-state";
 import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
 import StoryEditor from "@/components/editor/story-editor";
@@ -64,7 +68,7 @@ export default function WriteChapterPage() {
               setWordCount(extractWordCount(content));
             }
           } catch {
-            setError("Failed to load chapter content.");
+            toast.error("Failed to load chapter content", { description: "Please refresh to try again." });
           }
         }
       })
@@ -83,12 +87,11 @@ export default function WriteChapterPage() {
     if (!book) return;
 
     if (!chapterContent) {
-      setError("Please write something before saving.");
+      toast.error("Please write something before saving");
       return;
     }
 
     setIsSaving(true);
-    setError("");
     const wc = extractWordCount(chapterContent);
     try {
       if (isNew) {
@@ -107,11 +110,12 @@ export default function WriteChapterPage() {
         });
       }
       setSaved(true);
+      toast.success(isNew ? "Chapter created" : "Chapter saved");
       setTimeout(() => router.push(`/write/${bookSlug}`), 600);
     } catch (err: any) {
-      setError(
-        err?.response?.data?.error || err?.message || "Failed to save chapter"
-      );
+      toast.error("Couldn't save your chapter", {
+        description: err?.response?.data?.error || err?.message || "Please try again.",
+      });
     } finally {
       setIsSaving(false);
     }
@@ -122,95 +126,88 @@ export default function WriteChapterPage() {
   // ── Loading ──────────────────────────────────────────────────────────────
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-zinc-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="inline-flex h-8 w-8 animate-spin rounded-full border-[3px] border-zinc-200 border-t-zinc-700" />
-          <p className="mt-4 text-sm text-zinc-400">Loading…</p>
-        </div>
-      </div>
+      <>
+        <AppNav />
+        <PageLoader fullPage label="Loading chapter…" />
+      </>
     );
   }
 
   // ── Error / not found ────────────────────────────────────────────────────
   if (!book) {
     return (
-      <div className="min-h-screen bg-zinc-50 flex items-center justify-center px-4">
-        <div className="rounded-2xl bg-white border border-zinc-200 p-8 text-center max-w-sm shadow-sm">
-          <p className="text-zinc-700 font-semibold">{error || "Story not found"}</p>
-          <Link href="/write" className="mt-4 inline-block text-sm text-zinc-500 hover:text-zinc-800 underline-offset-2 hover:underline">
-            ← Back to writing
-          </Link>
-        </div>
-      </div>
+      <>
+        <AppNav />
+        {error ? (
+          <ErrorState fullPage title="We couldn't load this chapter" description={error} backHref="/write" backLabel="Back to writing" />
+        ) : (
+          <EmptyState
+            fullPage
+            icon={BookX}
+            title="Story not found"
+            description="This story doesn't exist, or you don't have access to it."
+            action={<Link href="/write" className="btn btn-dark btn-md">Back to writing</Link>}
+          />
+        )}
+      </>
     );
   }
 
   // ── Editor ───────────────────────────────────────────────────────────────
+  const saveLabel = saved ? "Saved" : isSaving ? "Saving…" : isNew ? "Save chapter" : "Update";
+
   return (
     <div className="min-h-screen bg-zinc-50">
-      {/* ── Top bar ──────────────────────────────────────────────────── */}
-      <header className="fixed top-0 inset-x-0 z-20 h-14 flex items-center justify-between px-4 sm:px-6 bg-white border-b border-zinc-200 shadow-sm">
-        {/* Left: back link */}
-        <Link
-          href={`/write/${bookSlug}`}
-          className="inline-flex items-center gap-1.5 text-sm text-zinc-500 hover:text-zinc-900 transition-colors"
-        >
-          <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-          </svg>
-          <span className="hidden sm:inline max-w-[180px] truncate">{book.title}</span>
-          <span className="sm:hidden">Back</span>
-        </Link>
+      {/* Top bar */}
+      <header className="fixed inset-x-0 top-0 z-20 h-14 border-b border-zinc-200 bg-white/90 backdrop-blur-xl">
+        <div className="mx-auto flex h-full max-w-5xl items-center gap-3 px-3 sm:px-5">
+          <Link
+            href={`/write/${bookSlug}`}
+            aria-label="Back to story"
+            className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full text-zinc-700 transition-colors hover:bg-zinc-100"
+          >
+            <ArrowLeft className="h-[18px] w-[18px]" />
+          </Link>
 
-        {/* Centre: chapter label */}
-        <span className="absolute left-1/2 -translate-x-1/2 text-[13px] font-semibold text-zinc-500 pointer-events-none">
-          {isNew ? "New chapter" : `Chapter ${displayNumber}`}
-        </span>
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-sm font-bold leading-tight text-zinc-950">{book.title}</p>
+            <p className="text-[11px] leading-tight text-zinc-500">{isNew ? "New chapter" : `Chapter ${displayNumber}`}</p>
+          </div>
 
-        {/* Right: word count + save */}
-        <div className="flex items-center gap-3">
           {wordCount > 0 && (
-            <span className="hidden sm:block text-[12px] text-zinc-400 tabular-nums">
-              {formatWords(wordCount)} words
-            </span>
+            <span className="badge badge-neutral hidden tabular-nums sm:inline-flex">{formatWords(wordCount)} words</span>
           )}
+
           <button
             type="button"
-            onClick={handleSave}
+            onClick={() => handleSave()}
             disabled={isSaving || saved}
-            className={`cursor-pointer px-4 py-1.5 rounded-lg text-[13px] font-semibold transition-all active:scale-[0.97] disabled:cursor-not-allowed ${
-              saved
-                ? "bg-emerald-500 text-white"
-                : "bg-zinc-900 text-white hover:bg-zinc-700 disabled:opacity-50"
-            }`}
+            className={`btn btn-md flex-shrink-0 ${saved ? "bg-green-600 text-white" : "btn-primary"}`}
           >
-            {saved ? "Saved ✓" : isSaving ? "Saving…" : isNew ? "Save" : "Update"}
+            {saved ? <Check className="h-4 w-4" /> : isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+            {saveLabel}
           </button>
         </div>
       </header>
 
-      {/* ── Main content ─────────────────────────────────────────────── */}
-      <main className="pt-14 pb-20">
-        <div className="mx-auto max-w-3xl px-4 sm:px-6 py-10">
-
-          {/* Error banner */}
-          {error && (
-            <div className="mb-6 rounded-xl bg-red-50 border border-red-200 px-4 py-3">
-              <p className="text-sm text-red-700">{error}</p>
-            </div>
-          )}
-
-          {/* Chapter title input — part of the document feel */}
+      {/* Main */}
+      <main className="pb-24 pt-14">
+        <div className="mx-auto max-w-3xl px-4 py-10 sm:px-6">
+          {/* Chapter title: styled like the reader's chapter heading */}
+          <p className="eyebrow mb-3 text-center">{isNew ? "New chapter" : `Chapter ${displayNumber}`}</p>
           <input
             type="text"
             value={chapterTitle}
-            onChange={(e) => { setChapterTitle(e.target.value); setSaved(false); }}
-            placeholder={`Chapter ${displayNumber} title (optional)`}
-            className="w-full mb-6 text-2xl sm:text-3xl font-bold text-zinc-900 placeholder:text-zinc-300 bg-transparent border-none outline-none focus:outline-none resize-none"
+            onChange={(e) => {
+              setChapterTitle(e.target.value);
+              setSaved(false);
+            }}
+            placeholder="Untitled chapter"
+            aria-label="Chapter title"
+            className="mb-8 w-full border-none bg-transparent text-center font-brand text-4xl font-black leading-tight tracking-tight text-zinc-950 outline-none placeholder:text-zinc-300 sm:text-5xl"
             disabled={isSaving}
           />
 
-          {/* Rich text editor */}
           <StoryEditor
             initialContent={chapterContent}
             onChange={handleContentChange}
@@ -219,11 +216,8 @@ export default function WriteChapterPage() {
             placeholder="Start writing your chapter here…"
           />
 
-          {/* Mobile word count */}
           {wordCount > 0 && (
-            <p className="sm:hidden mt-3 text-right text-[12px] text-zinc-400 tabular-nums">
-              {formatWords(wordCount)} words
-            </p>
+            <p className="mt-3 text-right text-xs tabular-nums text-zinc-500 sm:hidden">{formatWords(wordCount)} words</p>
           )}
         </div>
       </main>

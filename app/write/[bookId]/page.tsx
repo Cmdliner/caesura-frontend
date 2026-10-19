@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { ArrowLeft, BookX, Pencil, Trash2 } from "lucide-react";
+import EmptyState, { ErrorState, PageLoader } from "@/components/ui/empty-state";
 import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
 import AppNav from "@/components/layout/app-nav";
@@ -297,33 +299,29 @@ export default function BookWritePage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-zinc-50">
+      <>
         <AppNav />
-        <main className="pt-24 pb-16 flex items-center justify-center">
-          <div className="text-center">
-            <div className="inline-flex h-8 w-8 animate-spin rounded-full border-[3px] border-zinc-200 border-t-zinc-700" />
-            <p className="mt-4 text-sm text-zinc-500">Loading…</p>
-          </div>
-        </main>
-      </div>
+        <PageLoader fullPage label="Loading your story…" />
+      </>
     );
   }
 
   if (error || !book) {
     return (
-      <div className="min-h-screen bg-zinc-50">
+      <>
         <AppNav />
-        <main className="pt-24 pb-16">
-          <div className="mx-auto max-w-2xl px-4">
-            <div className="rounded-xl bg-red-50 border border-red-200 p-6 text-center">
-              <p className="text-red-700 font-semibold">{error || "Story not found"}</p>
-              <Link href="/write" className="mt-4 inline-block text-sm text-zinc-600 hover:underline">
-                ← Back to writing
-              </Link>
-            </div>
-          </div>
-        </main>
-      </div>
+        {error ? (
+          <ErrorState fullPage title="We couldn't load this story" description={error} backHref="/write" backLabel="Back to writing" />
+        ) : (
+          <EmptyState
+            fullPage
+            icon={BookX}
+            title="Story not found"
+            description="This story doesn't exist, or you don't have access to it."
+            action={<Link href="/write" className="btn btn-dark btn-md">Back to writing</Link>}
+          />
+        )}
+      </>
     );
   }
 
@@ -347,22 +345,18 @@ export default function BookWritePage() {
 
             <Link
               href="/write"
-              className="inline-flex items-center gap-1.5 text-[13px] text-zinc-500 hover:text-zinc-800 transition-colors mt-6 mb-8"
+              className="mb-6 mt-6 inline-flex items-center gap-1.5 text-sm font-medium text-zinc-600 transition-colors hover:text-zinc-950"
             >
-              <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-              </svg>
+              <ArrowLeft className="h-4 w-4" />
               All stories
             </Link>
 
             {/* Story header card */}
-            <div className="rounded-2xl bg-white border border-zinc-200 shadow-sm p-6 mb-6">
+            <div className="card mb-6 p-6">
               <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-2">
-                    <span className={`inline-flex px-2.5 py-0.5 rounded-full text-[11px] font-bold tracking-wide ${
-                      isPublished ? "bg-emerald-100 text-emerald-700" : "bg-zinc-100 text-zinc-600"
-                    }`}>
+                    <span className={`badge ${isPublished ? "badge-success" : "badge-neutral"}`}>
                       {isPublished ? "Published" : "Draft"}
                     </span>
                   </div>
@@ -377,14 +371,14 @@ export default function BookWritePage() {
                           if (e.key === "Enter") saveTitle();
                           if (e.key === "Escape") cancelEditTitle();
                         }}
-                        className="flex-1 text-xl font-extrabold text-zinc-900 bg-zinc-50 border border-zinc-300 rounded-lg px-3 py-1.5 outline-none focus:border-zinc-500 focus:ring-1 focus:ring-zinc-200 transition-all"
+                        className="field flex-1 !text-xl !font-extrabold"
                         disabled={titleSaving}
                       />
                       <button
                         type="button"
                         onClick={saveTitle}
                         disabled={titleSaving || !titleDraft.trim()}
-                        className="cursor-pointer px-3 py-1.5 rounded-lg bg-zinc-900 text-white text-[12px] font-semibold hover:bg-zinc-700 active:scale-95 transition-all disabled:opacity-40"
+                        className="btn btn-dark btn-md"
                       >
                         {titleSaving ? "Saving…" : "Save"}
                       </button>
@@ -392,7 +386,7 @@ export default function BookWritePage() {
                         type="button"
                         onClick={cancelEditTitle}
                         disabled={titleSaving}
-                        className="cursor-pointer px-3 py-1.5 rounded-lg border border-zinc-200 text-zinc-600 text-[12px] font-semibold hover:bg-zinc-50 active:scale-95 transition-all"
+                        className="btn btn-outline btn-md"
                       >
                         Cancel
                       </button>
@@ -401,20 +395,13 @@ export default function BookWritePage() {
                     <button
                       type="button"
                       onClick={startEditTitle}
-                      className="cursor-pointer group/title flex items-center gap-2 text-left"
+                      className="group/title flex items-center gap-2 text-left"
                       title="Click to rename"
                     >
-                      <h1 className="text-2xl sm:text-3xl font-extrabold text-zinc-900 leading-tight group-hover/title:text-zinc-600 transition-colors">
+                      <h1 className="font-brand text-3xl font-black leading-tight text-zinc-950 transition-colors group-hover/title:text-brand-700 sm:text-4xl">
                         {book.title}
                       </h1>
-                      <svg
-                        className="h-4 w-4 text-zinc-300 group-hover/title:text-zinc-500 transition-colors flex-shrink-0 mt-1"
-                        fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                      >
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                          d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                        />
-                      </svg>
+                      <Pencil className="mt-1 h-4 w-4 flex-shrink-0 text-zinc-300 transition-colors group-hover/title:text-brand-600" />
                     </button>
                   )}
                   {book.description && (
@@ -433,25 +420,18 @@ export default function BookWritePage() {
                         newStatus: isPublished ? "draft" : "published",
                       })
                     }
-                    className={`cursor-pointer px-4 py-2 rounded-xl text-[13px] font-semibold transition-all active:scale-[0.97] ${
-                      isPublished
-                        ? "bg-zinc-100 text-zinc-700 hover:bg-zinc-200"
-                        : "bg-emerald-600 text-white hover:bg-emerald-700"
-                    }`}
+                    className={`btn btn-md ${isPublished ? "btn-outline" : "btn-primary"}`}
                   >
                     {isPublished ? "Unpublish" : "Publish story"}
                   </button>
                   <button
                     type="button"
                     onClick={() => setModal({ type: "delete-book" })}
-                    className="cursor-pointer p-2 rounded-xl text-zinc-400 hover:text-red-500 hover:bg-red-50 active:scale-[0.97] transition-all"
+                    className="btn btn-outline h-10 w-10 !p-0 text-zinc-500 hover:!border-red-200 hover:!bg-red-50 hover:!text-red-600"
                     title="Delete this story"
+                    aria-label="Delete this story"
                   >
-                    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                      />
-                    </svg>
+                    <Trash2 className="h-4 w-4" />
                   </button>
                 </div>
               </div>
@@ -477,10 +457,10 @@ export default function BookWritePage() {
 
             {/* Chapters header */}
             <div className="mb-4 flex items-center justify-between">
-              <h2 className="text-[15px] font-bold text-zinc-900">Chapters</h2>
+              <h2 className="text-lg font-bold text-zinc-950">Chapters</h2>
               <Link
                 href={`/write/${book.slug}/chapter/new`}
-                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-zinc-900 text-white text-[13px] font-semibold hover:bg-zinc-700 transition-colors"
+                className="btn btn-primary btn-md"
               >
                 <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4" />
@@ -497,10 +477,10 @@ export default function BookWritePage() {
                   return (
                     <div
                       key={chapter.id}
-                      className="group flex items-center gap-3 p-4 rounded-xl bg-white border border-zinc-200 hover:border-zinc-300 transition-colors"
+                      className="card group flex items-center gap-3 !rounded-xl p-4 transition-colors hover:border-zinc-300"
                     >
                       {/* Number badge */}
-                      <div className="h-8 w-8 rounded-lg bg-zinc-100 flex items-center justify-center flex-shrink-0 text-[12px] font-bold text-zinc-600">
+                      <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-brand-100 text-xs font-bold tabular-nums text-brand-700">
                         {chapter.chapter_number}
                       </div>
 
@@ -509,7 +489,7 @@ export default function BookWritePage() {
                         <p className="text-[14px] font-semibold text-zinc-900 truncate">{label}</p>
                         <div className="flex items-center gap-2 mt-0.5">
                           <span className={`text-[11px] font-semibold ${
-                            isChapterPublished ? "text-emerald-600" : "text-zinc-400"
+                            isChapterPublished ? "text-green-700" : "text-zinc-500"
                           }`}>
                             {isChapterPublished ? "Published" : "Draft"}
                           </span>
@@ -525,7 +505,7 @@ export default function BookWritePage() {
                       <div className="flex items-center gap-1.5 flex-shrink-0">
                         <Link
                           href={`/write/${book.slug}/chapter/${chapter.chapter_number}`}
-                          className="cursor-pointer px-3 py-1.5 rounded-lg text-[12px] font-semibold text-zinc-700 bg-zinc-100 hover:bg-zinc-200 active:scale-95 transition-all"
+                          className="btn btn-outline min-h-8 px-3 text-xs"
                         >
                           Edit
                         </Link>
@@ -539,11 +519,7 @@ export default function BookWritePage() {
                               newStatus: isChapterPublished ? "draft" : "published",
                             })
                           }
-                          className={`cursor-pointer px-3 py-1.5 rounded-lg text-[12px] font-semibold active:scale-95 transition-all ${
-                            isChapterPublished
-                              ? "text-zinc-600 bg-zinc-100 hover:bg-zinc-200"
-                              : "text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-100"
-                          }`}
+                          className={`btn min-h-8 px-3 text-xs ${isChapterPublished ? "btn-outline" : "btn-primary"}`}
                         >
                           {isChapterPublished ? "Unpublish" : "Publish"}
                         </button>
@@ -551,7 +527,7 @@ export default function BookWritePage() {
                         <button
                           type="button"
                           onClick={() => setModal({ type: "delete-chapter", chapter })}
-                          className="cursor-pointer p-1.5 rounded-lg text-zinc-300 hover:text-red-500 hover:bg-red-50 active:scale-95 transition-all opacity-0 group-hover:opacity-100"
+                          className="flex h-8 w-8 items-center justify-center rounded-full text-zinc-400 opacity-0 transition-all hover:bg-red-50 hover:text-red-600 focus-visible:opacity-100 group-hover:opacity-100"
                           title="Delete chapter"
                         >
                           <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -1,6 +1,9 @@
 "use client";
 
 import { useEffect } from "react";
+import { ChevronRight, PenLine, Plus } from "lucide-react";
+import PageHero from "@/components/ui/page-hero";
+import EmptyState from "@/components/ui/empty-state";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
@@ -30,24 +33,18 @@ export default function WritePage() {
     <>
       <AppNav />
       <main className="min-h-screen bg-[#f8f8f8] pt-[60px] pb-16 page-enter">
-        {/* Header */}
-        <div className="bg-white border-b border-zinc-100">
-          <div className="mx-auto max-w-[1000px] px-4 sm:px-6 py-8 flex items-center justify-between gap-4">
-            <div className="animate-fade-up">
-              <h1 className="text-2xl sm:text-3xl font-extrabold text-zinc-900 tracking-tight">My Stories</h1>
-              <p className="mt-1 text-sm text-zinc-500">Manage your writing projects</p>
-            </div>
-            <Link
-              href="/create-story"
-              className="flex-shrink-0 inline-flex items-center gap-2 px-4 py-2.5 rounded-full bg-orange-500 text-white text-sm font-semibold hover:bg-orange-600 transition-colors animate-fade-up"
-            >
-              <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-              </svg>
-              New Story
+        <PageHero
+          eyebrow="Writer studio"
+          title="My stories"
+          description="Manage your writing projects."
+          containerClassName="mx-auto max-w-[1000px] px-4 sm:px-6"
+          actions={
+            <Link href="/create-story" className="btn btn-primary btn-md">
+              <Plus className="h-4 w-4" />
+              New story
             </Link>
-          </div>
-        </div>
+          }
+        />
 
         <div className="mx-auto max-w-[1000px] px-4 sm:px-6 pt-8">
           {isLoading ? (
@@ -57,33 +54,24 @@ export default function WritePage() {
               ))}
             </div>
           ) : books.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-24 text-center animate-fade-up">
-              <div className="h-20 w-20 rounded-2xl bg-orange-50 flex items-center justify-center mb-5">
-                <svg className="h-10 w-10 text-orange-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                </svg>
-              </div>
-              <h2 className="text-lg font-bold text-zinc-900">Start your first story</h2>
-              <p className="text-zinc-500 text-sm mt-1 max-w-xs">
-                Every great author started somewhere. Write the story only you can tell.
-              </p>
-              <Link
-                href="/create-story"
-                className="mt-6 inline-flex items-center gap-2 px-6 py-3 rounded-full bg-orange-500 text-white font-semibold hover:bg-orange-600 transition-colors"
-              >
-                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                </svg>
-                Create New Story
-              </Link>
-            </div>
+            <EmptyState
+              icon={PenLine}
+              title="Start your first story"
+              description="Every great author started somewhere. Write the story only you can tell."
+              action={
+                <Link href="/create-story" className="btn btn-primary btn-lg">
+                  <Plus className="h-4 w-4" />
+                  Create new story
+                </Link>
+              }
+            />
           ) : (
             <div className="space-y-3 animate-fade-up">
               {books.map((book) => (
                 <Link
                   key={book.id}
                   href={`/write/${book.slug}`}
-                  className="group flex items-center gap-4 p-4 rounded-2xl bg-white border border-zinc-200 hover:border-orange-200 hover:shadow-sm transition-all"
+                  className="group card card-interactive flex items-center gap-4 p-4"
                 >
                   {/* Cover placeholder */}
                   <div
@@ -102,11 +90,7 @@ export default function WritePage() {
                       <p className="text-sm text-zinc-500 truncate mt-0.5">{book.description}</p>
                     )}
                     <div className="flex items-center gap-3 mt-1.5">
-                      <span className={`inline-flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-full ${
-                        book.status === "published"
-                          ? "bg-green-50 text-green-700"
-                          : "bg-zinc-100 text-zinc-500"
-                      }`}>
+                      <span className={`badge ${book.status === "published" ? "badge-success" : "badge-neutral"}`}>
                         {book.status === "published" ? "Published" : "Draft"}
                       </span>
                       <span className="text-xs text-zinc-400">
@@ -115,9 +99,7 @@ export default function WritePage() {
                     </div>
                   </div>
 
-                  <svg className="h-5 w-5 text-zinc-300 group-hover:text-orange-400 transition-colors flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-                  </svg>
+                  <ChevronRight className="h-5 w-5 flex-shrink-0 text-zinc-300 transition-colors group-hover:text-brand-600" />
                 </Link>
               ))}
             </div>
