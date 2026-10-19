@@ -79,10 +79,10 @@ export default function Header({ solid = false }: { solid?: boolean }) {
         >
             {/* The bar: full-width and transparent over the hero, then it shrinks into a floating pill. */}
             <div
-                className={`pointer-events-auto relative z-10 mx-auto grid w-full grid-cols-[auto_1fr_auto] items-center gap-6 border transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${
+                className={`pointer-events-auto relative z-10 mx-auto grid w-full grid-cols-[1fr_auto] items-center gap-6 md:grid-cols-[auto_1fr_auto] border transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${
                     scrolled
                         ? "h-14 rounded-2xl border-zinc-200/80 bg-white/95 px-5 shadow-[0_8px_30px_rgba(0,0,0,0.12)] backdrop-blur-xl md:rounded-full md:px-6"
-                        : "h-16 rounded-none border-transparent bg-transparent px-3 md:px-12"
+                        : "h-16 rounded-none border-transparent bg-transparent px-2 md:px-12"
                 }`}
                 style={{ maxWidth: scrolled ? 960 : 1280 }}
             >

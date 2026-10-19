@@ -17,17 +17,12 @@ export const author: {
   /** Shown in the tooltip. */
   name: string;
   role: string;
-  /** Tiny tags under the name. */
-  interests: string[];
-  bio: string;
   avatar: string | null;
   contacts: AuthorContact[];
 } = {
   shortName: "Abiade",
   name: "Abiade Abdulazeez",
   role: "Software engineer",
-  interests: ["Poetry", "Fantasy", "Code"],
-  bio: "I write poetry, scribble stories and get lost in fantasy books. Caesura is where all of that meets my day job.",
   avatar: null,
   contacts: [
     { kind: "email", label: "Email", href: "" },

@@ -67,7 +67,7 @@ export default function AuthorCredit() {
         <span
           id="author-card"
           role="tooltip"
-          className="invisible absolute bottom-full left-1/2 z-30 w-72 -translate-x-1/2 translate-y-1 pb-3 text-left opacity-0 transition-all duration-200 group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:opacity-100 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100"
+          className="invisible absolute bottom-full left-1/2 z-30 w-64 -translate-x-1/2 translate-y-1 pb-3 text-left opacity-0 transition-all duration-200 group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:opacity-100 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100"
         >
           <span className="relative block rounded-2xl border border-zinc-200 bg-white p-4 shadow-[0_12px_40px_rgba(0,0,0,0.25)]">
             <span className="flex items-center gap-3">
@@ -78,21 +78,8 @@ export default function AuthorCredit() {
               </span>
             </span>
 
-            {author.interests.length > 0 && (
-              <span className="mt-3 flex flex-wrap gap-1.5">
-                {author.interests.map((tag) => (
-                  <span key={tag} className="rounded-full bg-zinc-100 px-2.5 py-1 text-[11px] font-medium text-zinc-600">
-                    {tag}
-                  </span>
-                ))}
-              </span>
-            )}
-
-            <span className="mt-3 block text-[13px] leading-relaxed text-zinc-600">{author.bio}</span>
-
             {contacts.length > 0 && (
-              <span className="mt-4 block border-t border-zinc-100 pt-3">
-                <span className="mb-2 block text-xs font-semibold text-zinc-900">Come say hello</span>
+              <span className="mt-3 block border-t border-zinc-100 pt-3">
                 <span className="flex flex-wrap gap-2">
                   {contacts.map((c) => (
                     <a
