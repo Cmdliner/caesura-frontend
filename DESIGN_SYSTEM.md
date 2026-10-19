@@ -64,6 +64,7 @@ Never use raw `orange-*`; use `brand-*`. Never use `bg-black`; use `zinc-950`.
 | `Logo` / `LogoMark` | Brand mark + wordmark |
 | `StoreBadge` | App Store / Google Play buttons ("Soon" until a URL is set in `lib/app-links.ts`) |
 | `Phone` + `LibraryScreen` / `ReaderScreen` | Illustrative device mockups (drawn, not real screenshots) |
+| `CommunityHero` / `CommunityTabs` / `FeatureGrid` / `DarkSteps` (`components/community/blocks.tsx`) | Shared layout for Forums, Reading Clubs and Contests: hero with an illustrative preview card, section switcher, feature cards, numbered dark steps |
 | `MenuButton` (layout) | Mobile menu trigger: `pill` (default) / `dots` / `lines` |
 
 ## Icons
