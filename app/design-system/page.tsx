@@ -66,12 +66,12 @@ function Swatch({ name, hex, token, text }: { name: string; hex: string; token?:
 }
 
 const brand = [
-  ["50", "#fff7ed"], ["100", "#ffedd5"], ["200", "#fed7aa"], ["300", "#fdba74"], ["400", "#fb923c"],
-  ["500", "#f97316"], ["600", "#ea580c"], ["700", "#c2410c"],
+  ["50", "#fff7ed"], ["100", "#ffedd4"], ["200", "#ffd6a7"], ["300", "#ffb86a"], ["400", "#ff8904"],
+  ["500", "#ff6900"], ["600", "#f54900"], ["700", "#ca3500"],
 ] as const;
 const ink = [
-  ["50", "#fafafa"], ["100", "#f4f4f5"], ["200", "#e4e4e7"], ["300", "#d4d4d8"], ["400", "#a1a1aa"],
-  ["500", "#71717a"], ["600", "#52525b"], ["700", "#3f3f46"], ["900", "#18181b"], ["950", "#09090b"],
+  ["50", "#fafafa"], ["100", "#f4f4f5"], ["200", "#e4e4e7"], ["300", "#d4d4d8"], ["400", "#9f9fa9"],
+  ["500", "#71717b"], ["600", "#52525c"], ["700", "#3f3f46"], ["900", "#18181b"], ["950", "#09090b"],
 ] as const;
 
 const iconSet: [string, LucideIcon][] = [
@@ -179,9 +179,9 @@ export default function DesignSystemPage() {
           <Sub>Status</Sub>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
             <Swatch name="Success bg" hex="#dcfce7" token="green-100" />
-            <Swatch name="Success text" hex="#166534" token="green-800" text="#fff" />
-            <Swatch name="Error bg" hex="#fee2e2" token="red-100" />
-            <Swatch name="Error text" hex="#dc2626" token="red-600" text="#fff" />
+            <Swatch name="Success text" hex="#016630" token="green-800" text="#fff" />
+            <Swatch name="Error bg" hex="#ffe2e2" token="red-100" />
+            <Swatch name="Error text" hex="#e7000b" token="red-600" text="#fff" />
           </div>
 
           <Sub>Section rhythm on the homepage</Sub>
