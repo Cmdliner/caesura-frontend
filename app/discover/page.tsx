@@ -1,6 +1,9 @@
 'use client';
 
 import { useState, useRef } from 'react';
+import { ArrowRight, CircleAlert, BookOpen } from "lucide-react";
+import PageHero from "@/components/ui/page-hero";
+import EmptyState, { ErrorState } from "@/components/ui/empty-state";
 import Link from 'next/link';
 import { toast } from 'sonner';
 import AppNav from '@/components/layout/app-nav';
@@ -145,97 +148,69 @@ export default function DiscoverPage() {
       <AppNav />
       <main className="min-h-screen bg-white pt-15 pb-20 page-enter">
 
-        {/* Header */}
-        <div className="border-b border-zinc-100 bg-white">
-          <div className="mx-auto max-w-[1400px] px-4 sm:px-6 py-8 animate-fade-up">
-            <div className="flex items-baseline justify-between gap-4">
-              <div>
-                <h1 className="text-3xl font-extrabold text-zinc-900 tracking-tight">Browse</h1>
-                <p className="mt-1.5 text-[15px] text-zinc-500">
-                  {activeGenre
-                    ? `Stories in ${activeGenre.name}`
-                    : 'Discover stories from emerging and classic authors'}
-                  {booksData && booksData.total > 0 && (
-                    <span className="ml-2 text-zinc-400">· {booksData.total.toLocaleString()} stories</span>
-                  )}
-                </p>
-              </div>
-              {activeGenre && (
-                <Link
-                  href={`/genres/${activeGenre.slug}`}
-                  className="flex-shrink-0 text-[12px] font-semibold text-zinc-500 hover:text-zinc-900 underline underline-offset-2 transition-colors hidden sm:block"
-                >
-                  See full genre page →
-                </Link>
+        <PageHero
+          compact
+          title="Browse"
+          containerClassName="mx-auto max-w-[1400px] px-4 sm:px-6"
+          description={
+            <>
+              {activeGenre ? `Stories in ${activeGenre.name}` : 'Discover stories from emerging and classic authors'}
+              {booksData && booksData.total > 0 && (
+                <span className="ml-2 text-zinc-500">· {booksData.total.toLocaleString()} stories</span>
               )}
-            </div>
-
-            {/* Genre filter pills */}
-            {genres.length > 0 && (
-              <div
-                ref={pillsRef}
-                className="mt-5 flex items-center gap-2 overflow-x-auto pb-1 scrollbar-hide"
-              >
-                {/* "All" pill */}
+            </>
+          }
+          actions={
+            activeGenre ? (
+              <Link href={`/genres/${activeGenre.slug}`} className="btn btn-outline btn-md hidden sm:inline-flex">
+                Full genre page
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+            ) : undefined
+          }
+        >
+          {genres.length > 0 && (
+            <div ref={pillsRef} className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-hide">
+              <button type="button" onClick={() => handleSelectGenre(null)} aria-pressed={!activeGenre} className="chip">
+                All
+              </button>
+              {genres.map((genre) => (
                 <button
+                  key={genre.id}
                   type="button"
-                  onClick={() => handleSelectGenre(null)}
-                  className={`cursor-pointer flex-shrink-0 px-4 py-1.5 rounded-full text-[12.5px] font-semibold transition-all active:scale-95 ${
-                    !activeGenre
-                      ? 'bg-zinc-900 text-white'
-                      : 'border border-zinc-200 text-zinc-600 hover:border-zinc-400 hover:text-zinc-900'
-                  }`}
+                  onClick={() => handleSelectGenre(genre)}
+                  aria-pressed={activeGenre?.id === genre.id}
+                  className="chip"
                 >
-                  All
+                  {genre.name}
                 </button>
+              ))}
+            </div>
+          )}
+        </PageHero>
 
-                {genres.map((genre) => (
-                  <button
-                    key={genre.id}
-                    type="button"
-                    onClick={() => handleSelectGenre(genre)}
-                    className={`cursor-pointer flex-shrink-0 px-4 py-1.5 rounded-full text-[12.5px] font-semibold transition-all active:scale-95 ${
-                      activeGenre?.id === genre.id
-                        ? 'bg-zinc-900 text-white'
-                        : 'border border-zinc-200 text-zinc-600 hover:border-zinc-400 hover:text-zinc-900'
-                    }`}
-                  >
-                    {genre.name}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-
-        <div className="mx-auto max-w-[1400px] px-4 sm:px-6 pt-8">
+        <div className="mx-auto max-w-[1400px] px-4 sm:px-6 pt-6">
           {isLoading ? (
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-x-4 gap-y-7">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-x-5 gap-y-9">
               {Array.from({ length: 18 }).map((_, i) => <SkeletonCard key={i} />)}
             </div>
           ) : error ? (
-            <div className="rounded-2xl bg-red-50 border border-red-100 p-12 text-center animate-fade-up">
-              <p className="text-red-700 font-semibold">Failed to load stories</p>
-              <p className="text-red-500 text-sm mt-1">Please try refreshing the page.</p>
-              <button type="button" onClick={() => window.location.reload()} className="mt-4 px-4 py-2 rounded-xl bg-zinc-900 text-white text-sm font-semibold hover:bg-zinc-700 transition-colors">
-                Retry
-              </button>
-            </div>
+            <ErrorState title="Failed to load stories" description="Please check your connection and try again." />
           ) : items.length === 0 ? (
-            <div className="rounded-2xl bg-zinc-50 border border-zinc-100 p-16 text-center animate-fade-up">
-              <p className="text-zinc-500 font-semibold">
-                {activeGenre ? `No stories in ${activeGenre.name} yet` : 'No stories available yet'}
-              </p>
-              <p className="text-zinc-400 text-sm mt-1">
-                {activeGenre ? 'Be the first to write one.' : 'Check back soon or start writing your own.'}
-              </p>
-              <Link href="/create-story" className="mt-5 inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-zinc-900 text-white text-sm font-semibold hover:bg-zinc-700 transition-colors">
-                Start writing →
-              </Link>
-            </div>
+            <EmptyState
+              icon={BookOpen}
+              title={activeGenre ? `No stories in ${activeGenre.name} yet` : 'No stories available yet'}
+              description={activeGenre ? 'Be the first to write one.' : 'Check back soon or start writing your own.'}
+              action={
+                <Link href="/create-story" className="btn btn-primary btn-md">
+                  Start writing
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
+              }
+            />
           ) : (
             <>
-              <div className={`grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-x-4 gap-y-7 transition-opacity duration-200 ${isFetching ? 'opacity-60' : 'opacity-100'} animate-fade-up`}>
+              <div className={`grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-x-5 gap-y-9 transition-opacity duration-200 ${isFetching ? 'opacity-60' : 'opacity-100'} animate-fade-up`}>
                 {items.map((book) => (
                   <BookCard
                     key={book.id}

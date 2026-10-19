@@ -1,6 +1,10 @@
 "use client";
 
 import { useState } from "react";
+import { BookOpen, Compass } from "lucide-react";
+import EmptyState, { ErrorState } from "@/components/ui/empty-state";
+import { ArrowLeft } from "lucide-react";
+import PageHero from "@/components/ui/page-hero";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import AppNav from "@/components/layout/app-nav";
@@ -216,28 +220,18 @@ export default function GenreDetailPage() {
     <>
       <AppNav />
       <main className="min-h-screen bg-white pt-[60px] page-enter">
-        {/* Header */}
-        <div className="border-b border-zinc-100">
-          <div className="mx-auto max-w-[1200px] px-4 sm:px-6 py-10 animate-fade-up">
-            <Link
-              href="/genres"
-              className="inline-flex items-center gap-1 text-[13px] text-zinc-400 hover:text-zinc-700 transition-colors mb-5"
-            >
-              <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-              </svg>
+        <PageHero
+          eyebrow="Genre"
+          title={genreLabel}
+          description={!isLoading && total > 0 ? `${total.toLocaleString()} ${total === 1 ? "story" : "stories"}` : undefined}
+          containerClassName="mx-auto max-w-[1200px] px-4 sm:px-6"
+          top={
+            <Link href="/genres" className="inline-flex items-center gap-1.5 text-[13px] font-medium text-zinc-600 transition-colors hover:text-zinc-950">
+              <ArrowLeft className="h-3.5 w-3.5" />
               All genres
             </Link>
-            <h1 className="text-[28px] sm:text-[34px] font-extrabold text-zinc-900 tracking-tight">
-              {genreLabel}
-            </h1>
-            {!isLoading && total > 0 && (
-              <p className="mt-1.5 text-[15px] text-zinc-500">
-                {total.toLocaleString()} {total === 1 ? "story" : "stories"}
-              </p>
-            )}
-          </div>
-        </div>
+          }
+        />
 
         <div className="mx-auto max-w-[1200px] px-4 sm:px-6 py-10">
           {isLoading ? (
@@ -261,30 +255,23 @@ export default function GenreDetailPage() {
               </section>
             </div>
           ) : error ? (
-            <div className="rounded-2xl bg-red-50 border border-red-100 p-12 text-center">
-              <p className="text-red-700 font-semibold text-sm">
-                {(error as any)?.response?.status === 404
-                  ? `No genre found for "${genreLabel}"`
-                  : "Failed to load stories"}
-              </p>
-              <Link
-                href="/genres"
-                className="mt-4 inline-block text-sm text-zinc-500 hover:text-zinc-900 underline underline-offset-2 transition-colors"
-              >
-                ← Browse all genres
-              </Link>
-            </div>
+            (error as any)?.response?.status === 404 ? (
+              <EmptyState
+                icon={Compass}
+                title={`No genre found for "${genreLabel}"`}
+                description="That genre doesn't exist. Try browsing the full list."
+                action={<Link href="/genres" className="btn btn-dark btn-md">Browse all genres</Link>}
+              />
+            ) : (
+              <ErrorState title="Failed to load stories" backHref="/genres" backLabel="All genres" />
+            )
           ) : items.length === 0 ? (
-            <div className="rounded-2xl bg-zinc-50 border border-zinc-100 p-16 text-center">
-              <p className="text-zinc-500 font-semibold text-sm">No stories in this genre yet</p>
-              <p className="text-zinc-400 text-sm mt-1">Be the first to write one.</p>
-              <Link
-                href="/create-story"
-                className="mt-5 inline-flex items-center gap-1.5 px-5 py-2.5 rounded-xl bg-zinc-900 text-white text-sm font-semibold hover:bg-zinc-700 active:scale-95 transition-all"
-              >
-                Start writing →
-              </Link>
-            </div>
+            <EmptyState
+              icon={BookOpen}
+              title="No stories in this genre yet"
+              description="Be the first to write one."
+              action={<Link href="/create-story" className="btn btn-primary btn-md">Start writing</Link>}
+            />
           ) : (
             <div className={`space-y-12 transition-opacity duration-200 ${isFetching ? "opacity-60" : ""}`}>
               {/* Top picks (first 6, first page only) */}
