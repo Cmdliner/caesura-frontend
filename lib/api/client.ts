@@ -35,8 +35,15 @@ class APIClient {
     this.client.interceptors.response.use(
       (response) => response,
       (error: AxiosError) => {
+        // No response means the request never reached the API (offline, server down, CORS, timeout).
+        const unreachable = !error.response
+          ? error.code === 'ECONNABORTED'
+            ? 'The request timed out. Please try again.'
+            : "We can't reach the server right now. Check your connection and try again."
+          : undefined;
+
         const apiError: APIError = {
-          message: error.message || 'Unknown error occurred',
+          message: unreachable || error.message || 'Unknown error occurred',
           status: error.response?.status,
           code: error.code,
         };

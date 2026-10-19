@@ -36,6 +36,14 @@ export const authAPI = {
     return response.data;
   },
 
+  forgotPassword: async (email: string): Promise<void> => {
+    await apiClient.post(ENDPOINTS.AUTH.FORGOT_PASSWORD, { email });
+  },
+
+  resetPassword: async (token: string, password: string): Promise<void> => {
+    await apiClient.post(ENDPOINTS.AUTH.RESET_PASSWORD, { token, password });
+  },
+
   logout: (): void => {
     clearAuth();
   },

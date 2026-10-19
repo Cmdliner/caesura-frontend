@@ -65,6 +65,25 @@ export const useAuthMutation = {
   },
 
   /**
+   * Request a password reset email
+   */
+  useForgotPassword: (options?: UseMutationOptions<void, unknown, { email: string }>) =>
+    useMutation({
+      mutationFn: ({ email }: { email: string }) => authAPI.forgotPassword(email),
+      ...options,
+    }),
+
+  /**
+   * Set a new password from a reset token
+   */
+  useResetPassword: (options?: UseMutationOptions<void, unknown, { token: string; password: string }>) =>
+    useMutation({
+      mutationFn: ({ token, password }: { token: string; password: string }) =>
+        authAPI.resetPassword(token, password),
+      ...options,
+    }),
+
+  /**
    * Register mutation
    */
   useRegister: (options?: UseMutationOptions<API.AuthResponse, unknown, any>) => {
