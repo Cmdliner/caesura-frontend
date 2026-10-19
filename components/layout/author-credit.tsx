@@ -39,7 +39,7 @@ function Avatar({ size }: { size: "sm" | "lg" }) {
     <img src={author.avatar} alt="" className={`${dims} rounded-full object-cover`} />
   ) : (
     <span className={`${dims} flex items-center justify-center rounded-full bg-brand-600 font-bold text-white`}>
-      {author.name[0]}
+      {author.shortName[0]}
     </span>
   );
 }
@@ -51,7 +51,7 @@ export default function AuthorCredit() {
   return (
     <p className="flex items-center justify-center gap-1.5 text-sm text-zinc-500">
       Built with
-      <Heart className="h-4 w-4 fill-brand-500 text-brand-500" aria-label="love" />
+      <Heart className="h-4 w-4 fill-red-500 text-red-500" aria-label="love" />
       by
       <span className="group relative inline-flex">
         <button
@@ -60,7 +60,7 @@ export default function AuthorCredit() {
           className="inline-flex items-center gap-2 rounded-full py-0.5 pl-0.5 pr-3 font-semibold text-white transition-colors hover:bg-white/10"
         >
           <Avatar size="sm" />
-          {author.name}
+          {author.shortName}
         </button>
 
         {/* Tooltip. pb-3 keeps the hover path unbroken between trigger and card so links stay clickable. */}
@@ -74,15 +74,25 @@ export default function AuthorCredit() {
               <Avatar size="lg" />
               <span className="min-w-0">
                 <span className="block text-sm font-bold text-zinc-950">{author.name}</span>
-                <span className="block text-xs text-zinc-500">{author.role}</span>
+                <span className="block text-xs font-medium text-brand-700">{author.role}</span>
               </span>
             </span>
+
+            {author.interests.length > 0 && (
+              <span className="mt-3 flex flex-wrap gap-1.5">
+                {author.interests.map((tag) => (
+                  <span key={tag} className="rounded-full bg-zinc-100 px-2.5 py-1 text-[11px] font-medium text-zinc-600">
+                    {tag}
+                  </span>
+                ))}
+              </span>
+            )}
 
             <span className="mt-3 block text-[13px] leading-relaxed text-zinc-600">{author.bio}</span>
 
             {contacts.length > 0 && (
               <span className="mt-4 block border-t border-zinc-100 pt-3">
-                <span className="mb-2 block text-[11px] font-semibold uppercase tracking-wider text-zinc-400">Get in touch</span>
+                <span className="mb-2 block text-xs font-semibold text-zinc-900">Come say hello</span>
                 <span className="flex flex-wrap gap-2">
                   {contacts.map((c) => (
                     <a

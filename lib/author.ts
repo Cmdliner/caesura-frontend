@@ -1,7 +1,7 @@
 /**
  * Who built Caesura. Powers the "Built with love by …" credit in the footer.
  *
- * - `avatar`: put an image in /public (e.g. /cmdliner.jpg) and set the path. Falls back to an initial.
+ * - `avatar`: put an image in /public (e.g. /abiade.jpg) and set the path. Falls back to an initial.
  * - `contacts`: only entries with a non-empty `href` are shown in the tooltip.
  *   Use full URLs, or `mailto:you@example.com` for email.
  */
@@ -12,21 +12,28 @@ export type AuthorContact = {
 };
 
 export const author: {
+  /** Shown in the footer line: "Built with love by <shortName>". */
+  shortName: string;
+  /** Shown in the tooltip. */
   name: string;
   role: string;
+  /** Tiny tags under the name. */
+  interests: string[];
   bio: string;
   avatar: string | null;
   contacts: AuthorContact[];
 } = {
-  name: "Cmdliner",
-  role: "Developer & maker of Caesura",
-  bio: "I build things for the web, and I made Caesura to give stories and the people who write them a better home.",
+  shortName: "Abiade",
+  name: "Abiade Abdulazeez",
+  role: "Software engineer",
+  interests: ["Poetry", "Fantasy", "Code"],
+  bio: "I write poetry, scribble stories and get lost in fantasy books. Caesura is where all of that meets my day job.",
   avatar: null,
   contacts: [
     { kind: "email", label: "Email", href: "" },
-    { kind: "github", label: "GitHub", href: "" },
-    { kind: "x", label: "X", href: "" },
     { kind: "linkedin", label: "LinkedIn", href: "" },
+    { kind: "x", label: "Twitter / X", href: "" },
+    { kind: "github", label: "GitHub", href: "https://github.com/Cmdliner" },
     { kind: "website", label: "Website", href: "" },
   ],
 };
