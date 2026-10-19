@@ -2,6 +2,9 @@ import Link from "next/link";
 import Logo from "@/components/ui/logo";
 import { DotPattern, Splash } from "@/components/ui/patterns";
 import AuthorCredit from "@/components/layout/author-credit";
+import BackToTop from "@/components/layout/back-to-top";
+import StoreBadge from "@/components/ui/store-badge";
+import { appLinks } from "@/lib/app-links";
 
 const columns = [
   {
@@ -83,76 +86,81 @@ const socials = [
 
 export default function Footer() {
   return (
-    <footer className="relative overflow-hidden bg-zinc-950 text-zinc-400">
-      <Splash variant="a" className="-right-32 -top-36 h-[26rem] w-[26rem] text-brand-600/10" />
-      <DotPattern className="inset-x-0 top-0 h-72 text-white/[0.07] [mask-image:linear-gradient(to_bottom,black,transparent)]" />
+    // The outer wrapper is transparent and inset, so the dark card floats with rounded corners
+    // on every side instead of being a full-bleed rectangle.
+    <footer className="px-3 pb-3 pt-4 sm:px-5 sm:pb-5">
+      <div className="relative overflow-hidden rounded-[2rem] bg-zinc-950 text-zinc-400 sm:rounded-[2.5rem]">
+        <Splash variant="a" className="-right-28 -top-36 h-[26rem] w-[26rem] text-brand-600/10" />
+        <Splash variant="c" className="-bottom-6 left-[38%] hidden h-32 w-32 text-brand-600/10 lg:block" />
+        <DotPattern className="inset-x-0 top-0 h-64 text-white/[0.06] [mask-image:linear-gradient(to_bottom,black,transparent)]" />
 
-      <div className="container-page relative pb-8 pt-16">
-        <div className="grid gap-12 lg:grid-cols-[1.4fr_2fr]">
-          {/* Brand */}
-          <div className="max-w-sm">
-            <Logo size="lg" tone="light" className="mb-4" />
-            <p className="text-sm leading-relaxed">
-              Where stories come alive and voices are heard. Read original fiction, publish your own, and build a
-              community around the stories you love.
-            </p>
+        <div className="container-page relative pb-8 pt-14 md:pt-16">
+          <div className="grid gap-12 lg:grid-cols-[1.25fr_2fr] lg:gap-16">
+            {/* Brand + app */}
+            <div className="max-w-sm">
+              <Logo size="lg" tone="light" />
+              <p className="mt-5 text-sm leading-relaxed">
+                Where stories come alive and voices are heard. Read original fiction, publish your own, and build a
+                community around the stories you love.
+              </p>
 
-            <div className="mt-6 flex gap-2">
-              {socials.map((s) => (
-                <Link
-                  key={s.label}
-                  href={s.href}
-                  aria-label={s.label}
-                  className="flex h-10 w-10 items-center justify-center rounded-full border border-white/15 text-zinc-300 transition-colors hover:border-white/40 hover:bg-white/5 hover:text-white"
-                >
-                  <svg viewBox="0 0 24 24" className="h-[18px] w-[18px]" aria-hidden="true">
-                    {s.icon}
-                  </svg>
-                </Link>
+              <p className="mb-3 mt-8 text-xs font-semibold uppercase tracking-widest text-zinc-500">Get the app</p>
+              <div className="flex flex-wrap gap-3">
+                <StoreBadge platform="ios" href={appLinks.ios} tone="light" className="!min-w-0 !px-4 !py-2.5" />
+                <StoreBadge platform="android" href={appLinks.android} tone="light" className="!min-w-0 !px-4 !py-2.5" />
+              </div>
+
+              <div className="mt-8 flex gap-2">
+                {socials.map((s) => (
+                  <Link
+                    key={s.label}
+                    href={s.href}
+                    aria-label={s.label}
+                    className="flex h-10 w-10 items-center justify-center rounded-full border border-white/15 text-zinc-300 transition-colors hover:border-white/40 hover:bg-white/5 hover:text-white"
+                  >
+                    <svg viewBox="0 0 24 24" className="h-[18px] w-[18px]" aria-hidden="true">
+                      {s.icon}
+                    </svg>
+                  </Link>
+                ))}
+              </div>
+            </div>
+
+            {/* Link columns */}
+            <div className="grid grid-cols-2 gap-x-8 gap-y-10 sm:grid-cols-3">
+              {columns.map((col) => (
+                <nav key={col.title} aria-label={col.title}>
+                  <h4 className="mb-5 text-xs font-semibold uppercase tracking-widest text-zinc-500">{col.title}</h4>
+                  <ul className="space-y-3.5 text-sm">
+                    {col.links.map((link) => (
+                      <li key={link.label}>
+                        <Link href={link.href} className="text-zinc-300 transition-colors hover:text-white">
+                          {link.label}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </nav>
               ))}
             </div>
           </div>
 
-          {/* Links */}
-          <div className="grid grid-cols-2 gap-10 sm:grid-cols-3">
-            {columns.map((col) => (
-              <div key={col.title}>
-                <h4 className="mb-4 text-sm font-semibold text-white">{col.title}</h4>
-                <ul className="space-y-3 text-sm">
-                  {col.links.map((link) => (
-                    <li key={link.label}>
-                      <Link href={link.href} className="transition-colors hover:text-white">
-                        {link.label}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="mt-14 grid items-center gap-5 border-t border-white/10 pt-8 text-sm text-zinc-500 md:grid-cols-3">
-          <p className="text-center md:text-left">© 2026 Caesura. All rights reserved.</p>
-          <AuthorCredit />
-          <div className="flex justify-center gap-6 md:justify-end">
-            <Link href="/privacy" className="transition-colors hover:text-white">
-              Privacy
-            </Link>
-            <Link href="/terms" className="transition-colors hover:text-white">
-              Terms
-            </Link>
+          {/* Bottom bar */}
+          <div className="mt-14 grid items-center gap-5 border-t border-white/10 pt-6 text-sm text-zinc-500 md:grid-cols-[1fr_auto_1fr]">
+            <p className="text-center md:text-left">© 2026 Caesura. All rights reserved.</p>
+            <AuthorCredit />
+            <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-3 md:justify-end">
+              <Link href="/privacy" className="transition-colors hover:text-white">
+                Privacy
+              </Link>
+              <Link href="/terms" className="transition-colors hover:text-white">
+                Terms
+              </Link>
+              <BackToTop />
+            </div>
           </div>
         </div>
       </div>
-
-      {/* Oversized wordmark */}
-      <p
-        aria-hidden="true"
-        className="pointer-events-none relative -mb-[0.2em] select-none text-center font-brand text-[22vw] font-black leading-none tracking-tight text-white/[0.04] md:text-[16rem]"
-      >
-        Caesura
-      </p>
     </footer>
   );
 }
