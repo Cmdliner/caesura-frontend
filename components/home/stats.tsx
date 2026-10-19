@@ -1,19 +1,23 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { BookOpen, Eye, Globe, Users, type LucideIcon } from "lucide-react";
+import SectionHeading from "@/components/ui/section-heading";
+import { DotPattern, Splash } from "@/components/ui/patterns";
 
 type Stat = {
   value: number;
   label: string;
   suffix?: string;
+  icon: LucideIcon;
 };
 
 export default function Stats() {
   const stats: Stat[] = [
-    { value: 50_000_000, label: "Active Readers", suffix: "+" },
-    { value: 500_000, label: "Stories Published", suffix: "+" },
-    { value: 150, label: "Countries Worldwide", suffix: "+" },
-    { value: 1_000_000_000, label: "Total Reads", suffix: "+" },
+    { value: 50_000_000, label: "Active Readers", suffix: "+", icon: Users },
+    { value: 500_000, label: "Stories Published", suffix: "+", icon: BookOpen },
+    { value: 150, label: "Countries Worldwide", suffix: "+", icon: Globe },
+    { value: 1_000_000_000, label: "Total Reads", suffix: "+", icon: Eye },
   ];
 
   const [hasAnimated, setHasAnimated] = useState(false);
@@ -72,25 +76,29 @@ export default function Stats() {
   );
 
   return (
-    <section ref={sectionRef} className="bg-black px-6 py-20 md:px-12 md:py-24">
-      <div className="mx-auto max-w-6xl">
-        <div className="mx-auto mb-12 max-w-3xl text-center">
-          <p className="mb-3 text-sm font-semibold uppercase tracking-[0.16em] text-orange-500">Scale</p>
-          <h2 className="mb-4 text-4xl font-bold tracking-tight text-white md:text-5xl">Join The Global Community</h2>
-          <p className="text-lg text-zinc-300">A thriving platform where great stories find the right audience.</p>
-        </div>
+    <section ref={sectionRef} className="section bg-zinc-950">
+      <Splash variant="a" className="-left-32 -top-40 h-[28rem] w-[28rem] text-brand-600/15" />
+      <Splash variant="b" className="-bottom-28 -right-24 h-72 w-[26rem] text-brand-600/10" />
+      <DotPattern className="inset-0 text-white/[0.07] [mask-image:radial-gradient(ellipse_at_center,black,transparent_75%)]" />
 
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="container-page relative">
+        <SectionHeading
+          tone="dark"
+          eyebrow="Scale"
+          title="Join the global community"
+          description="A thriving platform where great stories find the right audience."
+          className="mb-14"
+        />
+
+        <dl className="grid grid-cols-2 gap-y-12 lg:grid-cols-4 lg:gap-y-0 lg:[&>div+div]:border-l lg:[&>div+div]:border-white/10">
           {stats.map((stat, index) => (
-            <article
-              key={stat.label}
-              className="rounded-2xl border border-zinc-800 bg-zinc-950/70 p-6 text-center transition-colors duration-300 hover:border-orange-500/50"
-            >
-              <p className="mb-2 text-4xl font-bold text-orange-500 md:text-5xl">{displayCounts[index]}</p>
-              <p className="text-sm font-medium tracking-wide text-zinc-300">{stat.label}</p>
-            </article>
+            <div key={stat.label} className="px-4 text-center">
+              <stat.icon className="mx-auto mb-4 h-6 w-6 text-brand-400" strokeWidth={1.6} />
+              <dd className="text-4xl font-bold tracking-tight text-white tabular-nums md:text-5xl">{displayCounts[index]}</dd>
+              <dt className="mt-2 text-sm font-medium text-zinc-400">{stat.label}</dt>
+            </div>
           ))}
-        </div>
+        </dl>
       </div>
     </section>
   );

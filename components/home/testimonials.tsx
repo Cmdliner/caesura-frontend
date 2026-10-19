@@ -1,83 +1,78 @@
+import { Quote, Star } from "lucide-react";
+import SectionHeading from "@/components/ui/section-heading";
+import { Splash } from "@/components/ui/patterns";
+
+const testimonials = [
+  {
+    id: 1,
+    quote: "Caesura helped me build a loyal readership chapter by chapter. The feedback loop is unlike anything else.",
+    author: "Jessica Moreno",
+    role: "Fantasy Author",
+    image: "https://randomuser.me/api/portraits/women/44.jpg",
+  },
+  {
+    id: 2,
+    quote:
+      "I came for one story and ended up filling my reading list for months. Discovery feels completely effortless.",
+    author: "David Kim",
+    role: "Avid Reader",
+    image: "https://randomuser.me/api/portraits/men/32.jpg",
+    featured: true,
+  },
+  {
+    id: 3,
+    quote: "From drafting to publishing, this is the cleanest platform I've used to grow as a writer.",
+    author: "Maria Laurent",
+    role: "Romance Creator",
+    image: "https://randomuser.me/api/portraits/women/68.jpg",
+  },
+];
+
 export default function Testimonials() {
-  const testimonials = [
-    {
-      id: 1,
-      quote:
-        "Caesura helped me build a loyal readership chapter by chapter. The feedback loop is unlike anything else.",
-      author: "Jessica Moreno",
-      role: "Fantasy Author",
-      image: "https://randomuser.me/api/portraits/women/44.jpg",
-    },
-    {
-      id: 2,
-      quote:
-        "I came for one story and ended up filling my reading list for months. Discovery feels completely effortless.",
-      author: "David Kim",
-      role: "Avid Reader",
-      image: "https://randomuser.me/api/portraits/men/32.jpg",
-    },
-    {
-      id: 3,
-      quote:
-        "From drafting to publishing, this is the cleanest platform I've used to grow as a writer.",
-      author: "Maria Laurent",
-      role: "Romance Creator",
-      image: "https://randomuser.me/api/portraits/women/68.jpg",
-    },
-  ];
-
   return (
-    <section className="bg-zinc-50 px-6 py-20 md:px-12 md:py-24">
-      <div className="mx-auto max-w-6xl">
-        <div className="mx-auto mb-14 max-w-3xl text-center">
-          <p className="mb-3 text-sm font-semibold uppercase tracking-[0.16em] text-orange-500">
-            Community
-          </p>
-          <h2 className="mb-4 text-4xl font-bold tracking-tight text-zinc-950 md:text-5xl">
-            What Our Community Says
-          </h2>
-          <p className="text-lg text-zinc-600">
-            Trusted by readers and writers building stories that stick.
-          </p>
-        </div>
+    <section className="section bg-zinc-50">
+      <Splash variant="a" className="-left-40 -top-40 h-[26rem] w-[26rem] text-brand-100" />
+      <Splash variant="c" className="-right-6 bottom-10 hidden h-36 w-36 text-brand-200 lg:block" />
 
-        <div className="grid gap-5 md:grid-cols-3">
+      <div className="container-page relative">
+        <SectionHeading
+          eyebrow="Community"
+          title="Loved by readers and writers"
+          description="Trusted by people building stories that stick."
+          className="mb-14"
+        />
+
+        <div className="grid items-stretch gap-5 md:grid-cols-3">
           {testimonials.map((t) => (
-            <article
+            <figure
               key={t.id}
-              className="relative rounded-2xl border border-zinc-200 bg-white p-7 shadow-[0_4px_20px_rgba(0,0,0,0.05)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_12px_36px_rgba(0,0,0,0.1)] hover:border-orange-100"
+              className={`relative flex flex-col overflow-hidden rounded-3xl p-8 ${
+                t.featured
+                  ? "bg-zinc-950 text-white md:-my-4 md:py-12"
+                  : "card"
+              }`}
             >
-              {/* Decorative quote mark */}
-              <div className="absolute top-6 right-7 text-5xl font-serif text-orange-100 leading-none select-none">
-                "
-              </div>
-
-              {/* Stars */}
-              <div className="mb-4 flex gap-0.5">
-                {[...Array(5)].map((_, i) => (
-                  <svg key={i} className="h-4 w-4 text-amber-400" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                  </svg>
+              <Quote
+                className={`mb-5 h-9 w-9 ${t.featured ? "text-brand-500" : "text-brand-600"}`}
+                strokeWidth={1.8}
+                fill="currentColor"
+              />
+              <div className="mb-4 flex gap-0.5" aria-label="5 out of 5 stars">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <Star key={i} className="h-4 w-4 text-amber-400" fill="currentColor" strokeWidth={0} />
                 ))}
               </div>
-
-              <p className="mb-6 leading-relaxed text-zinc-700 text-[15px]">
-                &ldquo;{t.quote}&rdquo;
-              </p>
-
-              <div className="flex items-center gap-3 pt-5 border-t border-zinc-100">
-                <img
-                  src={t.image}
-                  alt={t.author}
-                  className="h-10 w-10 rounded-full object-cover"
-                  loading="lazy"
-                />
+              <blockquote className={`flex-1 text-[17px] leading-relaxed ${t.featured ? "text-zinc-100" : "text-zinc-700"}`}>
+                {t.quote}
+              </blockquote>
+              <figcaption className={`mt-8 flex items-center gap-3 border-t pt-6 ${t.featured ? "border-white/15" : "border-zinc-200"}`}>
+                <img src={t.image} alt="" className="h-11 w-11 rounded-full object-cover" loading="lazy" />
                 <div>
-                  <p className="text-sm font-semibold text-zinc-900">{t.author}</p>
-                  <p className="text-xs text-zinc-500">{t.role}</p>
+                  <p className={`text-sm font-semibold ${t.featured ? "text-white" : "text-zinc-950"}`}>{t.author}</p>
+                  <p className={`text-xs ${t.featured ? "text-zinc-400" : "text-zinc-500"}`}>{t.role}</p>
                 </div>
-              </div>
-            </article>
+              </figcaption>
+            </figure>
           ))}
         </div>
       </div>

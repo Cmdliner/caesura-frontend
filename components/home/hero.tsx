@@ -16,18 +16,8 @@ export default function Hero() {
       className="relative min-h-screen flex items-center justify-center bg-cover bg-center bg-no-repeat pt-20"
       style={{ backgroundImage: "url('/images/hero-bg.avif')" }}
     >
-      {/* Layered overlays for depth */}
-      <div className="absolute inset-0 bg-gradient-to-b from-black/65 via-black/60 to-black/75" />
-      <div
-        className="absolute inset-0"
-        style={{
-          background:
-            "radial-gradient(ellipse 80% 70% at 50% 42%, rgba(0,0,0,0.45) 0%, rgba(0,0,0,0.75) 100%)",
-        }}
-      />
-
-      {/* Subtle warm glow at top */}
-      <div className="absolute top-0 left-0 right-0 h-48 bg-gradient-to-b from-orange-900/20 to-transparent pointer-events-none" />
+      {/* Scrim keeps text legible over the photo */}
+      <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/65 to-black/80" />
 
       {/* Content */}
       <div
@@ -39,14 +29,9 @@ export default function Hero() {
         }}
       >
         {/* Eyebrow */}
-        <div className="inline-flex items-center gap-2 mb-6 px-4 py-1.5 rounded-full border border-white/20 bg-white/10 backdrop-blur-sm">
-          <span className="h-1.5 w-1.5 rounded-full bg-orange-400 animate-pulse" />
-          <span className="text-xs font-semibold text-white/80 tracking-widest uppercase">
-            Stories that move you
-          </span>
-        </div>
+        <p className="eyebrow eyebrow-light mb-6">Stories that move you</p>
 
-        <h1 className="text-5xl md:text-7xl font-black font-brand text-white mb-6 leading-[1.05] drop-shadow-lg">
+        <h1 className="text-5xl md:text-7xl font-black font-brand text-white mb-6 leading-[1.05]">
           Stories Worth
           <br />
           <span className="text-orange-400">Reading</span>
@@ -57,17 +42,11 @@ export default function Hero() {
           and build a library that&apos;s truly yours.
         </p>
 
-        <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-          <Link
-            href="/discover"
-            className="group relative px-8 py-4 bg-orange-500 text-white font-semibold rounded-full transition-all duration-300 shadow-lg shadow-orange-900/30 hover:bg-orange-400 hover:shadow-xl hover:shadow-orange-900/40 hover:-translate-y-0.5"
-          >
+        <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
+          <Link href="/discover" className="btn btn-primary btn-lg">
             Start Reading
           </Link>
-          <Link
-            href="/create-story"
-            className="px-8 py-4 border-2 border-white/60 text-white font-semibold rounded-full hover:bg-white hover:text-zinc-900 hover:border-white transition-all duration-300 hover:-translate-y-0.5"
-          >
+          <Link href="/create-story" className="btn btn-outline-light btn-lg">
             Start Writing
           </Link>
         </div>
@@ -79,7 +58,7 @@ export default function Hero() {
       </div>
 
       {/* Scroll indicator */}
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-1.5 opacity-60">
+      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10 hidden flex-col items-center gap-1.5 opacity-60 [@media(min-height:760px)]:flex">
         <span className="text-[11px] text-white/70 uppercase tracking-widest font-medium">Scroll</span>
         <div className="w-px h-8 bg-gradient-to-b from-white/60 to-transparent" />
       </div>

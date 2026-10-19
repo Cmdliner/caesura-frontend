@@ -1,146 +1,111 @@
+import { Bookmark, ChartColumn, Compass, MessagesSquare, MonitorSmartphone, PenLine, type LucideIcon } from "lucide-react";
+import SectionHeading from "@/components/ui/section-heading";
+import { DotPattern, Splash } from "@/components/ui/patterns";
+
+const small: { icon: LucideIcon; title: string; description: string }[] = [
+  {
+    icon: PenLine,
+    title: "Creator Publishing",
+    description: "Publish chapters in minutes, schedule releases, and keep your readership engaged consistently.",
+  },
+  {
+    icon: Bookmark,
+    title: "Reader Retention",
+    description: "Bookmarks, progress sync, and notifications help readers stay invested from first chapter to finale.",
+  },
+  {
+    icon: MessagesSquare,
+    title: "Community Signals",
+    description: "Comments, reactions, and review threads give writers and readers a meaningful feedback loop.",
+  },
+  {
+    icon: MonitorSmartphone,
+    title: "Cross-Device Reading",
+    description: "A clean, responsive interface on desktop and mobile, tuned for long-form reading comfort.",
+  },
+];
+
+const bars = [38, 52, 44, 68, 60, 82, 96];
+
 export default function Features() {
-  const features: { icon: IconName; title: string; description: string }[] = [
-    {
-      icon: "compass",
-      title: "Editorial Discovery",
-      description:
-        "Surface high-quality reads with curated rails, genre spotlights, and personalized recommendations.",
-    },
-    {
-      icon: "pen",
-      title: "Creator Publishing",
-      description:
-        "Publish chapters in minutes, schedule releases, and keep your readership engaged consistently.",
-    },
-    {
-      icon: "bookmark",
-      title: "Reader Retention",
-      description:
-        "Bookmarks, progress sync, and notifications help readers stay invested from first chapter to finale.",
-    },
-    {
-      icon: "chat",
-      title: "Community Signals",
-      description:
-        "Comments, reactions, and review threads provide meaningful feedback loops for writers and readers.",
-    },
-    {
-      icon: "devices",
-      title: "Cross-Device Experience",
-      description:
-        "A clean, responsive interface across desktop and mobile with optimized reading comfort.",
-    },
-    {
-      icon: "chart",
-      title: "Growth Analytics",
-      description:
-        "Track reads, completion rate, and engagement trends to understand what resonates with your audience.",
-    },
-  ];
-
   return (
-    <section className="relative overflow-hidden bg-white px-6 py-20 md:px-12 md:py-24">
-      <div className="pointer-events-none absolute -left-16 top-10 h-44 w-44 rounded-full bg-orange-100 blur-3xl" />
-      <div className="pointer-events-none absolute -right-20 bottom-0 h-56 w-56 rounded-full bg-zinc-200/50 blur-3xl" />
+    <section className="section bg-white">
+      <Splash variant="c" className="-left-10 top-16 hidden h-40 w-40 text-brand-100 lg:block" />
+      <DotPattern className="right-0 top-0 hidden h-56 w-80 text-zinc-300/70 [mask-image:linear-gradient(to_bottom_left,black,transparent)] lg:block" />
 
-      <div className="mx-auto max-w-6xl">
-        <div className="mb-14 grid items-end gap-8 lg:grid-cols-[1.4fr_1fr]">
-          <div>
-            <p className="mb-3 text-sm font-semibold uppercase tracking-[0.16em] text-orange-500">Platform Advantage</p>
-            <h2 className="mb-4 text-4xl font-bold tracking-tight text-zinc-950 md:text-5xl">Built For Readers And Storytellers</h2>
-            <p className="max-w-2xl text-lg text-zinc-600">A focused, product-grade experience designed to help stories get discovered, communities grow, and creators sustain momentum.</p>
-          </div>
+      <div className="container-page relative">
+        <SectionHeading
+          align="left"
+          eyebrow="Platform"
+          title="Built for readers and storytellers"
+          description="One focused place to get stories discovered, grow a community, and keep creators moving."
+          className="mb-14"
+        />
 
-          <aside className="rounded-2xl border border-zinc-200 bg-zinc-950 p-6 text-white shadow-[0_14px_40px_rgba(0,0,0,0.2)]">
-            <p className="text-sm uppercase tracking-[0.14em] text-zinc-300">Live Snapshot</p>
-            <p className="mt-4 text-4xl font-bold text-orange-500">87%</p>
-            <p className="mt-2 text-sm text-zinc-300">Readers discover their next title via curated rails and tailored recommendations.</p>
-          </aside>
-        </div>
+        <div className="grid gap-5 lg:grid-cols-4">
+          {/* Lead feature: photo tile */}
+          <article className="group relative flex min-h-[26rem] flex-col justify-end overflow-hidden rounded-3xl bg-zinc-950 lg:col-span-2 lg:row-span-2">
+            <img
+              src="https://images.unsplash.com/photo-1481627834876-b7833e8f5570?auto=format&fit=crop&w=1200&q=70"
+              alt=""
+              loading="lazy"
+              className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/70 to-zinc-950/10" />
+            <div className="relative p-7 md:p-9">
+              <span className="icon-tile mb-5 !bg-brand-600 !text-white">
+                <Compass className="h-5 w-5" />
+              </span>
+              <h3 className="text-2xl font-bold text-white md:text-3xl">Editorial Discovery</h3>
+              <p className="mt-3 max-w-md leading-relaxed text-zinc-300">
+                Curated shelves, genre spotlights and tailored recommendations surface high-quality reads, so the right
+                story finds the right reader.
+              </p>
+              <p className="mt-6 inline-flex items-center gap-3 rounded-full bg-white/10 py-1.5 pl-2 pr-4 text-sm text-white ring-1 ring-white/20">
+                <span className="rounded-full bg-brand-600 px-2.5 py-0.5 text-xs font-bold">87%</span>
+                of readers find their next title through curated rails
+              </p>
+            </div>
+          </article>
 
-        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {features.map((feature, index) => (
-            <article
-              key={feature.title}
-              className="group relative overflow-hidden rounded-2xl border border-zinc-200 bg-white p-6 shadow-[0_6px_24px_rgba(0,0,0,0.06)] transition-all duration-300 hover:-translate-y-1 hover:border-orange-300 hover:shadow-[0_12px_36px_rgba(0,0,0,0.14)]"
-            >
-              <span className="absolute left-0 top-0 h-full w-1 bg-zinc-200 transition-colors duration-300 group-hover:bg-orange-500" />
-
-              <div className="mb-5 flex items-center justify-between">
-                <span className="inline-flex h-10 min-w-10 items-center justify-center rounded-md border border-zinc-300 bg-zinc-50 text-zinc-800 transition-colors duration-300 group-hover:border-orange-300 group-hover:text-orange-500">
-                  <FeatureIcon name={feature.icon} />
-                </span>
-                <span className="text-xs font-semibold uppercase tracking-[0.12em] text-zinc-400">
-                  {String(index + 1).padStart(2, "0")}
-                </span>
-              </div>
-
-              <h3 className="mb-3 text-xl font-semibold text-zinc-950">{feature.title}</h3>
-              <p className="leading-relaxed text-zinc-600">{feature.description}</p>
+          {small.map(({ icon: Icon, title, description }) => (
+            <article key={title} className="card card-interactive p-6 lg:col-span-1">
+              <span className="icon-tile mb-5">
+                <Icon className="h-5 w-5" />
+              </span>
+              <h3 className="mb-2 text-lg font-semibold text-zinc-950">{title}</h3>
+              <p className="text-[15px] leading-relaxed text-zinc-600">{description}</p>
             </article>
           ))}
+
+          {/* Wide analytics tile */}
+          <article className="relative overflow-hidden rounded-3xl bg-brand-600 p-7 text-white md:p-9 lg:col-span-4">
+            <Splash variant="a" className="-right-16 -top-28 h-80 w-80 text-brand-500" />
+            <Splash variant="c" className="bottom-2 left-[40%] hidden h-24 w-24 text-brand-500 md:block" />
+            <div className="relative grid items-center gap-8 md:grid-cols-[1.2fr_1fr]">
+              <div>
+                <span className="icon-tile mb-5 !bg-white !text-brand-700">
+                  <ChartColumn className="h-5 w-5" />
+                </span>
+                <h3 className="text-2xl font-bold md:text-3xl">Growth Analytics</h3>
+                <p className="mt-3 max-w-lg leading-relaxed text-white/85">
+                  Track reads, completion rate and engagement trends to understand exactly what resonates with your
+                  audience, chapter by chapter.
+                </p>
+              </div>
+              <div aria-hidden="true" className="flex h-32 items-end gap-2.5 md:justify-end">
+                {bars.map((h, i) => (
+                  <span
+                    key={i}
+                    className="w-7 rounded-t-lg bg-white/90 first:bg-white/50 even:bg-white/70 md:w-9"
+                    style={{ height: `${h}%` }}
+                  />
+                ))}
+              </div>
+            </div>
+          </article>
         </div>
       </div>
     </section>
-  );
-}
-
-type IconName = "compass" | "pen" | "bookmark" | "chat" | "devices" | "chart";
-
-function FeatureIcon({ name }: { name: IconName }) {
-  const common = "h-5 w-5";
-
-  if (name === "compass") {
-    return (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className={common}>
-        <circle cx="12" cy="12" r="9" />
-        <path d="M15.8 8.2 13.5 13.5 8.2 15.8l2.3-5.3 5.3-2.3Z" />
-      </svg>
-    );
-  }
-
-  if (name === "pen") {
-    return (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className={common}>
-        <path d="M4 20h4l10-10-4-4L4 16v4Z" />
-        <path d="m13 7 4 4" />
-      </svg>
-    );
-  }
-
-  if (name === "bookmark") {
-    return (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className={common}>
-        <path d="M6 4h12v16l-6-3-6 3V4Z" />
-      </svg>
-    );
-  }
-
-  if (name === "chat") {
-    return (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className={common}>
-        <path d="M4 5h16v10H8l-4 4V5Z" />
-        <path d="M8 9h8" />
-        <path d="M8 12h5" />
-      </svg>
-    );
-  }
-
-  if (name === "devices") {
-    return (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className={common}>
-        <rect x="3" y="5" width="13" height="10" rx="1.5" />
-        <rect x="17" y="8" width="4" height="9" rx="1" />
-      </svg>
-    );
-  }
-
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className={common}>
-      <path d="M4 18h16" />
-      <path d="M7 15V9" />
-      <path d="M12 15V6" />
-      <path d="M17 15v-3" />
-    </svg>
   );
 }

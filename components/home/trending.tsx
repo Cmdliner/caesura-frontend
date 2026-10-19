@@ -1,10 +1,22 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useRef } from "react";
+import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
 import BookCard from "@/components/books/book-card";
+import SectionHeading from "@/components/ui/section-heading";
+import { DotPattern, Splash } from "@/components/ui/patterns";
 
 export default function Trending() {
   const sliderRef = useRef<HTMLDivElement | null>(null);
+  const pausedRef = useRef(false);
+
+  const scrollByCard = (direction: 1 | -1) => {
+    const slider = sliderRef.current;
+    const firstCard = slider?.querySelector("article");
+    if (!slider || !firstCard) return;
+    slider.scrollBy({ left: direction * ((firstCard as HTMLElement).offsetWidth + 28), behavior: "smooth" });
+  };
 
   useEffect(() => {
     const slider = sliderRef.current;
@@ -13,6 +25,9 @@ export default function Trending() {
     }
 
     const interval = window.setInterval(() => {
+      if (pausedRef.current) {
+        return;
+      }
       const firstCard = slider.querySelector("article");
       if (!firstCard) {
         return;
@@ -85,22 +100,54 @@ export default function Trending() {
   ];
 
   return (
-    <section className="bg-zinc-50 px-6 py-20 md:px-12 md:py-24">
-      <div className="mx-auto max-w-6xl">
-        <div className="mx-auto mb-14 max-w-3xl text-center">
-          <p className="mb-3 text-sm font-semibold uppercase tracking-[0.16em] text-orange-500">Hot Shelf</p>
-          <h2 className="mb-4 text-4xl font-bold tracking-tight text-zinc-950 md:text-5xl">Trending Now</h2>
-          <p className="text-lg text-zinc-600">The stories readers are bingeing this week.</p>
+    <section className="section bg-brand-50">
+      <DotPattern className="inset-0 text-brand-200/70 [mask-image:linear-gradient(to_bottom,black,transparent_70%)]" />
+      <Splash variant="b" className="-right-32 -top-16 hidden h-72 w-[26rem] text-brand-100 lg:block" />
+
+      <div className="container-page relative">
+        <div className="mb-12 flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
+          <SectionHeading
+            align="left"
+            eyebrow="Hot shelf"
+            title="Trending now"
+            description="The stories readers are bingeing this week."
+          />
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => scrollByCard(-1)}
+              aria-label="Previous stories"
+              className="btn btn-outline h-11 w-11 !p-0"
+            >
+              <ChevronLeft className="h-5 w-5" />
+            </button>
+            <button
+              type="button"
+              onClick={() => scrollByCard(1)}
+              aria-label="Next stories"
+              className="btn btn-outline h-11 w-11 !p-0"
+            >
+              <ChevronRight className="h-5 w-5" />
+            </button>
+            <Link href="/discover" className="btn btn-dark btn-md ml-2 hidden sm:inline-flex">
+              View all
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
         </div>
 
         <div
           ref={sliderRef}
-          className="flex gap-7 overflow-x-auto px-1 pb-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          onMouseEnter={() => (pausedRef.current = true)}
+          onMouseLeave={() => (pausedRef.current = false)}
+          onFocus={() => (pausedRef.current = true)}
+          onBlur={() => (pausedRef.current = false)}
+          className="-mx-1 flex snap-x snap-mandatory gap-7 overflow-x-auto px-1 pb-6 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         >
           {stories.map((story) => (
             <article
               key={story.id}
-              className="min-w-0 flex-[0_0_78%] sm:flex-[0_0_54%] md:flex-[0_0_39%] lg:flex-[0_0_30%] xl:flex-[0_0_23%]"
+              className="min-w-0 flex-[0_0_78%] snap-start sm:flex-[0_0_54%] md:flex-[0_0_39%] lg:flex-[0_0_30%] xl:flex-[0_0_23%]"
             >
               <BookCard
                 id={story.id}
