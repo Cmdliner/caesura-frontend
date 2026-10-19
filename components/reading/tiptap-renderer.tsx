@@ -6,11 +6,13 @@ interface TipTapRendererProps {
   contentHtml?: string | null;
   content?: Record<string, any> | null;
   title?: string;
+  /** Large decorative first letter (use for the start of a chapter). */
+  dropCap?: boolean;
 }
 
-export default function TipTapRenderer({ contentHtml, content, title }: TipTapRendererProps) {
+export default function TipTapRenderer({ contentHtml, content, title, dropCap = false }: TipTapRendererProps) {
   return (
-    <article className="w-full max-w-2xl mx-auto">
+    <article className={`w-full max-w-2xl mx-auto ${dropCap ? "has-dropcap" : ""}`}>
       {title && (
         <h1 className="mb-8 text-3xl font-extrabold text-zinc-900 leading-tight">{title}</h1>
       )}
@@ -30,10 +32,21 @@ export default function TipTapRenderer({ contentHtml, content, title }: TipTapRe
 
       <style>{`
         .reading-body {
-          font-size: 1.0625rem;
+          font-size: var(--reader-size, 1.0625rem);
           line-height: 1.85;
-          color: #18181b;
+          color: var(--reader-fg, #18181b);
           word-break: break-word;
+        }
+
+        /* Brand drop-cap on the first paragraph of a chapter (mirrors the app reader mockup) */
+        .has-dropcap .reading-body p:first-of-type::first-letter {
+          float: left;
+          font-family: var(--font-brand), serif;
+          font-weight: 900;
+          font-size: 4.1em;
+          line-height: 0.78;
+          padding: 0.06em 0.1em 0 0;
+          color: var(--reader-accent, #c2410c);
         }
 
         .content-rendered p,
@@ -46,7 +59,7 @@ export default function TipTapRenderer({ contentHtml, content, title }: TipTapRe
           font-size: 1.5rem;
           font-weight: 700;
           line-height: 1.25;
-          color: #09090b;
+          color: var(--reader-fg, #09090b);
           margin-top: 2.5em;
           margin-bottom: 0.75em;
         }
@@ -55,7 +68,7 @@ export default function TipTapRenderer({ contentHtml, content, title }: TipTapRe
         .reading-body h3 {
           font-size: 1.2rem;
           font-weight: 600;
-          color: #18181b;
+          color: var(--reader-fg, #18181b);
           margin-top: 2em;
           margin-bottom: 0.5em;
         }
@@ -94,21 +107,21 @@ export default function TipTapRenderer({ contentHtml, content, title }: TipTapRe
 
         .content-rendered blockquote,
         .reading-body blockquote {
-          border-left: 3px solid #d4d4d8;
+          border-left: 3px solid var(--reader-line, #d4d4d8);
           padding: 0.25em 0 0.25em 1.25rem;
           margin: 1.5em 0;
-          color: #71717a;
+          color: var(--reader-muted, #71717a);
           font-style: italic;
         }
 
         .content-rendered code,
         .reading-body code {
-          background: #f4f4f5;
+          background: var(--reader-panel, #f4f4f5);
           border-radius: 0.25rem;
           padding: 0.15em 0.4em;
           font-family: ui-monospace, 'Cascadia Code', Consolas, monospace;
           font-size: 0.875em;
-          color: #3f3f46;
+          color: var(--reader-fg, #3f3f46);
         }
 
         .content-rendered pre,
@@ -136,13 +149,13 @@ export default function TipTapRenderer({ contentHtml, content, title }: TipTapRe
         .content-rendered hr,
         .reading-body hr {
           border: none;
-          border-top: 1.5px solid #e4e4e7;
+          border-top: 1.5px solid var(--reader-line, #e4e4e7);
           margin: 2.5em 0;
         }
 
         .content-rendered a,
         .reading-body a {
-          color: #27272a;
+          color: var(--reader-fg, #27272a);
           text-decoration: underline;
           text-decoration-thickness: 1px;
           text-underline-offset: 2px;
@@ -150,7 +163,7 @@ export default function TipTapRenderer({ contentHtml, content, title }: TipTapRe
 
         .content-rendered a:hover,
         .reading-body a:hover {
-          color: #71717a;
+          color: var(--reader-muted, #71717a);
         }
       `}</style>
     </article>

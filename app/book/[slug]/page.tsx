@@ -1,9 +1,14 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
+import { ArrowLeft, ArrowRight, BookOpen, BookX, ChevronLeft, ChevronRight, List } from "lucide-react";
+import AppNav from "@/components/layout/app-nav";
+import EmptyState, { ErrorState, PageLoader } from "@/components/ui/empty-state";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import ChapterSidebar from "@/components/reading/chapter-sidebar";
+import ChapterSidebar, { ChapterList } from "@/components/reading/chapter-sidebar";
+import ReaderSettings, { useReaderPrefs } from "@/components/reading/reader-settings";
+import { Splash } from "@/components/ui/patterns";
 import TipTapRenderer from "@/components/reading/tiptap-renderer";
 import { useBookQueries, useBookMutation } from "@/lib/api/queries";
 import { useAuth } from "@/app/providers/auth-provider";
@@ -20,6 +25,8 @@ export default function BookReaderPage() {
   const [scrollProgress, setScrollProgress] = useState(0);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [progressLoaded, setProgressLoaded] = useState(false);
+
+  const prefs = useReaderPrefs();
 
   const scrollTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -85,37 +92,31 @@ export default function BookReaderPage() {
 
   // ── Loading ──────────────────────────────────────────────────────────────────
   if (bookLoading) {
-    return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
-        <div className="text-center">
-          <div className="inline-flex h-9 w-9 animate-spin rounded-full border-[3px] border-zinc-200 border-t-zinc-700" />
-          <p className="mt-4 text-sm text-zinc-400">Loading…</p>
-        </div>
-      </div>
-    );
+    return <PageLoader fullPage label="Loading story…" />;
   }
 
   // ── Not found ────────────────────────────────────────────────────────────────
   if (bookError || !book) {
+    const status = (bookError as any)?.response?.status;
     return (
       <>
-        <main className="min-h-screen bg-white flex items-center justify-center px-4">
-          <div className="text-center max-w-sm">
-            <div className="mx-auto mb-4 h-14 w-14 rounded-2xl bg-zinc-100 flex items-center justify-center">
-              <svg className="h-7 w-7 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-              </svg>
-            </div>
-            <p className="text-[15px] font-bold text-zinc-900">Book not found</p>
-            <p className="mt-1 text-sm text-zinc-500">This book doesn&apos;t exist or has been removed.</p>
-            <Link
-              href="/library"
-              className="mt-5 inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-zinc-900 text-white text-sm font-semibold hover:bg-zinc-700 transition-colors"
-            >
-              ← Back to Library
-            </Link>
-          </div>
-        </main>
+        <AppNav />
+        {bookError && status !== 404 ? (
+          <ErrorState fullPage title="We couldn't load this story" backHref="/library" backLabel="Back to library" />
+        ) : (
+          <EmptyState
+            fullPage
+            icon={BookX}
+            title="Story not found"
+            description="This story doesn't exist or has been removed by its author."
+            action={
+              <>
+                <Link href="/discover" className="btn btn-dark btn-md">Browse stories</Link>
+                <Link href="/library" className="btn btn-outline btn-md">Back to library</Link>
+              </>
+            }
+          />
+        )}
       </>
     );
   }
@@ -124,187 +125,202 @@ export default function BookReaderPage() {
   const hasPrev = currentChapter > 1;
   const hasNext = currentChapter < totalChapters;
 
+  const authors = book.gutenberg_authors?.length
+    ? book.gutenberg_authors
+    : book.author
+      ? [book.author.display_name || book.author.username]
+      : [];
+  const authorLine = authors.join(", ");
+
+  // Whole-book progress: finished chapters + how far through this one
+  const overallProgress =
+    totalChapters > 0 ? Math.min(100, ((currentChapter - 1 + scrollProgress / 100) / totalChapters) * 100) : 0;
+  const minutes = chapter?.word_count ? Math.max(1, Math.round(chapter.word_count / 230)) : null;
+  const prevChapter = hasPrev ? book.chapters[currentChapter - 2] : null;
+  const nextChapter = hasNext ? book.chapters[currentChapter] : null;
+
   return (
-    <div className="min-h-screen bg-white">
-      {/* Reading progress bar */}
-      <div className="fixed top-0 left-0 right-0 z-[70] h-[3px] bg-zinc-100">
-        <div
-          className="h-full bg-[#f97316] transition-[width] duration-200 ease-out"
-          style={{ width: `${scrollProgress}%` }}
-        />
-      </div>
-
-      {/* Chapter sidebar */}
-      <ChapterSidebar
-        chapters={book.chapters || []}
-        currentChapter={currentChapter}
-        onChapterSelect={handleChapterChange}
-        isOpen={sidebarOpen}
-        onClose={() => setSidebarOpen(false)}
-        bookTitle={book.title}
-      />
-
-      {/* Reading toolbar — sits right at the top (no AppNav) */}
-      <div className="fixed top-[3px] left-0 right-0 z-30 bg-white/98 backdrop-blur-sm border-b border-zinc-100 h-11">
-        <div className="h-full max-w-[860px] mx-auto px-4 flex items-center gap-3">
-          {/* Back link */}
+    <div
+      className="min-h-screen bg-[color:var(--reader-bg)] text-[color:var(--reader-fg)] transition-colors duration-300"
+      style={prefs.style}
+    >
+      {/* Top bar */}
+      <header className="fixed left-0 right-0 top-0 z-30 h-14 border-b border-[color:var(--reader-line)] bg-[color:var(--reader-bg)]/90 backdrop-blur-xl lg:left-[320px]">
+        <div className="mx-auto flex h-full max-w-5xl items-center gap-2 px-3 sm:px-5">
           <Link
             href="/library"
-            className="cursor-pointer flex-shrink-0 inline-flex items-center gap-1 text-[12px] font-semibold text-zinc-400 hover:text-zinc-700 transition-colors"
+            aria-label="Back to library"
+            className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full text-[color:var(--reader-fg)] transition-colors hover:bg-[color:var(--reader-panel)]"
           >
-            <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-            </svg>
-            <span className="hidden sm:inline">Library</span>
+            <ArrowLeft className="h-[18px] w-[18px]" />
           </Link>
 
-          <span className="text-zinc-200 text-sm flex-shrink-0">|</span>
+          <div className="min-w-0 flex-1 text-center lg:text-left">
+            <p className="truncate text-sm font-bold leading-tight">{book.title}</p>
+            {authorLine && <p className="truncate text-[11px] leading-tight text-[color:var(--reader-muted)]">{authorLine}</p>}
+          </div>
 
-          {/* Book title */}
-          <p className="flex-1 min-w-0 text-[12.5px] font-semibold text-zinc-600 truncate">
-            {book.title}
-          </p>
-
-          {/* Chapter position */}
           {totalChapters > 0 && (
-            <span className="flex-shrink-0 text-[11.5px] text-zinc-400 tabular-nums hidden sm:block">
-              Ch {currentChapter} / {totalChapters}
+            <span className="hidden flex-shrink-0 rounded-full bg-[color:var(--reader-panel)] px-3 py-1 text-xs font-semibold tabular-nums text-[color:var(--reader-muted)] sm:block">
+              Chapter {currentChapter} of {totalChapters}
             </span>
           )}
 
-          {/* Contents toggle */}
+          <ReaderSettings theme={prefs.theme} size={prefs.size} onTheme={prefs.setTheme} onSize={prefs.setSize} />
+
           <button
             type="button"
             onClick={() => setSidebarOpen(true)}
-            className="cursor-pointer flex-shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-zinc-200 text-[12px] font-semibold text-zinc-600 hover:bg-zinc-50 hover:border-zinc-300 active:scale-95 transition-all"
             aria-label="Open chapter list"
+            className="flex h-9 flex-shrink-0 items-center gap-2 rounded-full bg-[color:var(--reader-panel)] px-3.5 text-[13px] font-semibold transition-colors hover:bg-[color:var(--reader-line)] lg:hidden"
           >
-            <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h7" />
-            </svg>
+            <List className="h-4 w-4" />
             <span className="hidden sm:inline">Contents</span>
           </button>
         </div>
+
+        {/* Progress line */}
+        <div className="absolute inset-x-0 bottom-[-1px] h-[3px] bg-transparent">
+          <div className="h-full bg-brand-600 transition-[width] duration-200 ease-out" style={{ width: `${scrollProgress}%` }} />
+        </div>
+      </header>
+
+      {/* Desktop contents rail */}
+      <aside
+        aria-label="Book contents"
+        className="fixed bottom-0 left-0 top-0 z-20 hidden w-[320px] flex-col border-r border-[color:var(--reader-line)] bg-[color:var(--reader-bg)] lg:flex"
+      >
+        <div className="flex-shrink-0 border-b border-[color:var(--reader-line)] p-5">
+          <div className="flex gap-4">
+            <div className="h-[5.5rem] w-16 flex-shrink-0 overflow-hidden rounded-lg bg-[color:var(--reader-panel)] shadow-card">
+              {book.cover_url ? (
+                <img src={book.cover_url} alt="" className="h-full w-full object-cover" />
+              ) : (
+                <div className="flex h-full w-full items-center justify-center">
+                  <BookOpen className="h-6 w-6 text-brand-600" />
+                </div>
+              )}
+            </div>
+            <div className="min-w-0">
+              <Link href="/discover" className="eyebrow !text-[color:var(--reader-accent)] hover:underline">Caesura</Link>
+              <h2 className="mt-1 line-clamp-3 text-[15px] font-bold leading-snug">{book.title}</h2>
+              {authorLine && <p className="mt-1 line-clamp-1 text-xs text-[color:var(--reader-muted)]">{authorLine}</p>}
+            </div>
+          </div>
+
+          <div className="mt-4">
+            <div className="mb-1.5 flex items-center justify-between text-[11px] font-semibold text-[color:var(--reader-muted)]">
+              <span>Your progress</span>
+              <span className="tabular-nums">{Math.round(overallProgress)}%</span>
+            </div>
+            <div className="h-1.5 overflow-hidden rounded-full bg-[color:var(--reader-line)]">
+              <div className="h-full rounded-full bg-brand-600 transition-[width] duration-300" style={{ width: `${overallProgress}%` }} />
+            </div>
+          </div>
+        </div>
+
+        <p className="px-5 pb-1 pt-4 text-[11px] font-bold uppercase tracking-widest text-[color:var(--reader-muted)]">
+          {totalChapters} {totalChapters === 1 ? "chapter" : "chapters"}
+        </p>
+        <div className="flex-1 overflow-y-auto pb-4">
+          <ChapterList chapters={book.chapters || []} currentChapter={currentChapter} onSelect={handleChapterChange} />
+        </div>
+      </aside>
+
+      {/* Contents drawer (screens without the rail) */}
+      <div className="lg:hidden">
+        <ChapterSidebar
+          chapters={book.chapters || []}
+          currentChapter={currentChapter}
+          onChapterSelect={handleChapterChange}
+          isOpen={sidebarOpen}
+          onClose={() => setSidebarOpen(false)}
+          bookTitle={book.title}
+        />
       </div>
 
-      {/* Main reading area */}
-      <main className="pt-[48px] pb-24 min-h-screen">
-        <div className="max-w-[680px] mx-auto px-5 sm:px-8">
-
+      {/* Reading area */}
+      <main className="min-h-screen pb-28 pt-14 lg:pl-[320px]">
+        <div className="mx-auto max-w-[44rem] px-5 sm:px-8">
           {chapterLoading ? (
-            <div className="flex items-center justify-center py-32">
-              <div className="text-center">
-                <div className="inline-flex h-8 w-8 animate-spin rounded-full border-[3px] border-zinc-100 border-t-zinc-500" />
-                <p className="mt-4 text-sm text-zinc-400">Loading chapter…</p>
-              </div>
-            </div>
+            <PageLoader label="Loading chapter…" />
           ) : !chapter ? (
-            <div className="rounded-2xl bg-red-50 border border-red-100 p-8 text-center">
-              <p className="text-red-700 font-semibold text-sm">Failed to load chapter content</p>
-            </div>
+            <ErrorState title="Failed to load this chapter" description="The chapter content didn't load. Please try again." />
           ) : (
             <>
               {/* Chapter header */}
-              <header className="mb-10 sm:mb-14">
-                {/* Ornamental divider */}
-                <div className="flex items-center gap-3 mb-8">
-                  <div className="flex-1 h-px bg-zinc-100" />
-                  <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-zinc-300">
-                    Chapter {chapter.chapter_number}
-                  </span>
-                  <div className="flex-1 h-px bg-zinc-100" />
+              <header className="animate-fade-up pb-10 pt-12 text-center sm:pb-14 sm:pt-16">
+                <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-[color:var(--reader-accent)]">
+                  {chapter.title && !/^chapter/i.test(chapter.title) ? `Chapter ${chapter.chapter_number}` : book.title}
+                </p>
+                <h1 className="mt-3 font-brand text-4xl font-black leading-[1.08] tracking-tight sm:text-5xl">
+                  {chapter.title || `Chapter ${chapter.chapter_number}`}
+                </h1>
+
+                <div className="mt-5 flex items-center justify-center gap-2.5 text-xs text-[color:var(--reader-muted)]">
+                  {chapter.word_count ? <span>{chapter.word_count.toLocaleString()} words</span> : null}
+                  {chapter.word_count && minutes ? <span aria-hidden="true">·</span> : null}
+                  {minutes ? <span>{minutes} min read</span> : null}
                 </div>
 
-                {chapter.title && (
-                  <h1 className="text-[28px] sm:text-[34px] font-extrabold text-zinc-900 leading-[1.2] tracking-tight text-center mb-4">
-                    {chapter.title}
-                  </h1>
-                )}
-
-                {chapter.published_at && (
-                  <p className="text-center text-[12px] text-zinc-400">
-                    {new Date(chapter.published_at).toLocaleDateString("en-US", {
-                      year: "numeric",
-                      month: "long",
-                      day: "numeric",
-                    })}
-                  </p>
-                )}
-
-                {chapter.word_count && (
-                  <p className="text-center text-[11.5px] text-zinc-300 mt-1">
-                    {chapter.word_count.toLocaleString()} words
-                  </p>
-                )}
+                {/* Ornament: a pause between the title and the story */}
+                <div className="mx-auto mt-8 flex items-center justify-center gap-3" aria-hidden="true">
+                  <span className="h-px w-12 bg-[color:var(--reader-line)]" />
+                  <span className="h-1.5 w-1.5 rounded-full bg-brand-600" />
+                  <span className="h-px w-12 bg-[color:var(--reader-line)]" />
+                </div>
               </header>
 
               {/* Body */}
-              <TipTapRenderer
-                contentHtml={chapter.content_html}
-                content={chapter.content}
-              />
+              <TipTapRenderer contentHtml={chapter.content_html} content={chapter.content} dropCap />
 
-              {/* Chapter navigation */}
-              <nav className="mt-16 pt-10 border-t border-zinc-100">
-                <div className="flex items-stretch gap-3">
+              {/* End of chapter */}
+              <nav className="mt-20" aria-label="Chapter navigation">
+                {!hasNext && (
+                  <div className="relative mb-6 overflow-hidden rounded-3xl bg-brand-50 p-8 text-center">
+                    <Splash variant="c" className="-right-6 -top-6 h-28 w-28 text-brand-200" />
+                    <p className="relative text-[11px] font-bold uppercase tracking-[0.22em] text-brand-700">The end</p>
+                    <h3 className="relative mt-2 font-brand text-3xl font-black text-zinc-950">You finished {book.title}</h3>
+                    <div className="relative mt-5 flex flex-wrap justify-center gap-3">
+                      <Link href="/discover" className="btn btn-primary btn-md">
+                        Find your next story <ArrowRight className="h-4 w-4" />
+                      </Link>
+                      <Link href="/library" className="btn btn-outline btn-md">Back to library</Link>
+                    </div>
+                  </div>
+                )}
+
+                <div className="grid gap-3 sm:grid-cols-2">
                   <button
                     type="button"
                     onClick={() => hasPrev && handleChapterChange(currentChapter - 1)}
                     disabled={!hasPrev}
-                    className="cursor-pointer flex-1 group flex flex-col items-start gap-1 px-5 py-4 rounded-2xl border border-zinc-200 hover:border-zinc-300 hover:bg-zinc-50 disabled:opacity-30 disabled:cursor-not-allowed active:scale-[0.99] transition-all"
+                    className="group flex items-center gap-3 rounded-2xl border border-[color:var(--reader-line)] p-4 text-left transition-colors hover:bg-[color:var(--reader-panel)] disabled:pointer-events-none disabled:opacity-40"
                   >
-                    <span className="text-[10.5px] font-bold uppercase tracking-widest text-zinc-400 group-hover:text-zinc-600 transition-colors">
-                      ← Previous
+                    <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-[color:var(--reader-panel)] transition-transform group-hover:-translate-x-0.5">
+                      <ChevronLeft className="h-5 w-5" />
                     </span>
-                    {hasPrev && book.chapters[currentChapter - 2] && (
-                      <span className="text-[13px] font-semibold text-zinc-900 line-clamp-1">
-                        {book.chapters[currentChapter - 2].title || `Chapter ${currentChapter - 1}`}
-                      </span>
-                    )}
+                    <span className="min-w-0">
+                      <span className="block text-[11px] font-bold uppercase tracking-widest text-[color:var(--reader-muted)]">Previous</span>
+                      <span className="block truncate text-sm font-semibold">{prevChapter ? prevChapter.title || `Chapter ${currentChapter - 1}` : "You're at the start"}</span>
+                    </span>
                   </button>
 
                   <button
                     type="button"
                     onClick={() => hasNext && handleChapterChange(currentChapter + 1)}
                     disabled={!hasNext}
-                    className="cursor-pointer flex-1 group flex flex-col items-end gap-1 px-5 py-4 rounded-2xl border border-zinc-200 hover:border-zinc-300 hover:bg-zinc-50 disabled:opacity-30 disabled:cursor-not-allowed active:scale-[0.99] transition-all text-right"
+                    className="group flex items-center justify-end gap-3 rounded-2xl bg-zinc-950 p-4 text-right text-white transition-colors hover:bg-zinc-800 disabled:pointer-events-none disabled:opacity-40"
                   >
-                    <span className="text-[10.5px] font-bold uppercase tracking-widest text-zinc-400 group-hover:text-zinc-600 transition-colors">
-                      Next →
+                    <span className="min-w-0">
+                      <span className="block text-[11px] font-bold uppercase tracking-widest text-zinc-400">Next</span>
+                      <span className="block truncate text-sm font-semibold">{nextChapter ? nextChapter.title || `Chapter ${currentChapter + 1}` : "No more chapters"}</span>
                     </span>
-                    {hasNext && book.chapters[currentChapter] && (
-                      <span className="text-[13px] font-semibold text-zinc-900 line-clamp-1">
-                        {book.chapters[currentChapter].title || `Chapter ${currentChapter + 1}`}
-                      </span>
-                    )}
+                    <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-brand-600 transition-transform group-hover:translate-x-0.5">
+                      <ChevronRight className="h-5 w-5" />
+                    </span>
                   </button>
                 </div>
-
-                {/* Chapter indicator dots */}
-                {totalChapters > 1 && totalChapters <= 20 && (
-                  <div className="mt-6 flex items-center justify-center gap-1.5">
-                    {book.chapters.map((ch) => (
-                      <button
-                        key={ch.id}
-                        type="button"
-                        onClick={() => handleChapterChange(ch.chapter_number)}
-                        title={`Chapter ${ch.chapter_number}${ch.title ? `: ${ch.title}` : ""}`}
-                        className={`cursor-pointer transition-all rounded-full ${
-                          ch.chapter_number === currentChapter
-                            ? "h-2 w-5 bg-[#f97316]"
-                            : "h-2 w-2 bg-zinc-200 hover:bg-zinc-400"
-                        }`}
-                      />
-                    ))}
-                  </div>
-                )}
-
-                {/* Numeric indicator for long books */}
-                {totalChapters > 20 && (
-                  <p className="mt-5 text-center text-[12px] text-zinc-400 tabular-nums">
-                    {currentChapter} of {totalChapters}
-                  </p>
-                )}
               </nav>
             </>
           )}
