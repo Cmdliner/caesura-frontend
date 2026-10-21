@@ -57,15 +57,9 @@ export default function PersonCard({ person }: { person: API.Person }) {
       </div>
 
       <div className="flex flex-1 flex-col gap-4 px-5 pb-5">
-        <div className="relative -mt-8 flex items-end gap-3">
-          <Link href={`/u/${person.username}`} className="flex-shrink-0" aria-label={`${name}'s profile`}>
-            <PersonAvatar person={person} className="h-16 w-16 text-xl ring-4 ring-white" />
-          </Link>
-          <p className="pb-1 text-xs tabular-nums text-zinc-500">
-            {plural(followers, "follower", "followers")}
-            {person.stories_count > 0 && ` · ${plural(person.stories_count, "story", "stories")}`}
-          </p>
-        </div>
+        <Link href={`/u/${person.username}`} className="relative -mt-8 block w-fit" aria-label={`${name}'s profile`}>
+          <PersonAvatar person={person} className="h-16 w-16 text-xl ring-4 ring-white" />
+        </Link>
 
         <div className="min-w-0">
           <Link href={`/u/${person.username}`} className="block truncate font-bold text-zinc-950 hover:text-brand-700">
@@ -80,19 +74,31 @@ export default function PersonCard({ person }: { person: API.Person }) {
           <p className="text-sm text-zinc-400">No bio yet.</p>
         )}
 
-        <div className="mt-auto">
+        <dl className="mt-auto grid grid-cols-2 divide-x divide-zinc-200 rounded-xl bg-zinc-50 py-2.5 text-center">
+          <div>
+            <dd className="text-sm font-bold tabular-nums text-zinc-950">{followers.toLocaleString()}</dd>
+            <dt className="text-xs text-zinc-500">{followers === 1 ? "Follower" : "Followers"}</dt>
+          </div>
+          <div>
+            <dd className="text-sm font-bold tabular-nums text-zinc-950">{person.stories_count.toLocaleString()}</dd>
+            <dt className="text-xs text-zinc-500">{person.stories_count === 1 ? "Story" : "Stories"}</dt>
+          </div>
+        </dl>
+      </div>
+
+      <div className={`relative overflow-hidden border-t border-zinc-100 px-5 py-4 ${banner.bg}`}>
+        <Splash variant={banner.variant} className={`-bottom-20 -left-8 h-36 w-36 rotate-180 ${banner.splash}`} />
+        <div className="relative [&>*]:w-full [&>button]:w-full">
           {person.is_me ? (
-            <Link href="/profile" className="btn btn-outline btn-md w-full">
+            <Link href="/profile" className="btn btn-outline btn-md bg-white">
               This is you
             </Link>
           ) : (
-            <div className="[&>button]:w-full">
-              <FollowButton
-                username={person.username}
-                isFollowing={person.is_following}
-                onChange={(r) => setFollowers(r.follower_count)}
-              />
-            </div>
+            <FollowButton
+              username={person.username}
+              isFollowing={person.is_following}
+              onChange={(r) => setFollowers(r.follower_count)}
+            />
           )}
         </div>
       </div>
