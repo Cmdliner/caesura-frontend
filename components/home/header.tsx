@@ -5,7 +5,7 @@ import Link from "next/link";
 import Logo from "@/components/ui/logo";
 import { useRouter } from "next/navigation";
 import { useState, useEffect, useRef } from "react";
-import { BookOpen, Compass, PenLine, Shapes, Smartphone, Users } from "lucide-react";
+import { BookOpen, Compass, PenLine, Shapes, Smartphone, Users, UsersRound } from "lucide-react";
 import MobileMenu from "@/components/layout/mobile-menu";
 import MenuButton from "@/components/layout/menu-button";
 import { useAuth } from "@/app/providers/auth-provider";
@@ -14,6 +14,7 @@ import { tokenManager, userManager } from "@/lib/utils";
 const navItems = [
     { label: "Discover", href: "/discover", icon: Compass },
     { label: "Genres", href: "/genres", icon: Shapes },
+    { label: "People", href: "/people", icon: UsersRound },
     { label: "Library", href: "/library", icon: BookOpen },
     { label: "Write", href: "/write", icon: PenLine },
     { label: "Community", href: "/community", icon: Users },

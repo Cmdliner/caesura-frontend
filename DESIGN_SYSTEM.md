@@ -60,7 +60,9 @@ Never use raw `orange-*`; use `brand-*`. Never use `bg-black`; use `zinc-950`.
 | `ErrorState` (from `empty-state`) | **Every failed load.** Friendly copy + Try again + optional way back |
 | `PageLoader` (from `empty-state`) | Every loading spinner |
 | `Alert` | Inline form/page banners (`error` / `success` / `info`). Never hand-roll red boxes |
-| `Modal` | Dialog on the native `<dialog>` (focus trap, Esc, inert background). Centred card on desktop, bottom sheet on phones. Esc, backdrop and X all call `onRequestClose` so the parent can confirm before discarding edits |
+| `Modal` | Dialog on the native `<dialog>` (focus trap, Esc, inert background). Centred card on desktop, bottom sheet on phones. Esc, backdrop and X all call `onRequestClose` so the parent can confirm before discarding edits |
+| `ShareSheet` (`components/share/`) | Share dialog: swipeable row of apps (WhatsApp, X, Facebook, Telegram, Reddit, Email, plus the system share sheet where the browser has one) and a copy-link field. Mount it only while open and pass `{url, title, text}`. Targets live in `lib/share.ts`; brand marks come from `simple-icons`
+| `FollowButton` / `PersonCard` / `UserListModal` (`components/people/`) | Follow toggle (optimistic, rolls back on failure, asks signed-out users to sign in), a person card for People and lists, and the followers/following dialog |
 | `StatusPage` | Full-page 404 / 500 |
 | `Logo` / `LogoMark` | Brand mark + wordmark |
 | `StoreBadge` | App Store / Google Play buttons ("Soon" until a URL is set in `lib/app-links.ts`) |

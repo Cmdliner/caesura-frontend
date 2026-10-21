@@ -15,6 +15,7 @@ import {
   Smartphone,
   User,
   type LucideIcon,
+  UsersRound,
 } from "lucide-react";
 import { useAuth } from "@/app/providers/auth-provider";
 import { tokenManager, userManager } from "@/lib/utils";
@@ -27,6 +28,7 @@ type NavItem = { label: string; href: string; icon: LucideIcon };
 const publicLinks: NavItem[] = [
   { label: "Browse", href: "/discover", icon: Compass },
   { label: "Genres", href: "/genres", icon: Shapes },
+  { label: "People", href: "/people", icon: UsersRound },
 ];
 const memberLinks: NavItem[] = [...publicLinks, { label: "Library", href: "/library", icon: BookOpen }];
 

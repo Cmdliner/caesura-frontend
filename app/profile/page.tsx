@@ -22,9 +22,13 @@ import AppNav from "@/components/layout/app-nav";
 import Footer from "@/components/layout/footer";
 import EditProfileModal from "@/components/profile/edit-profile-modal";
 import ProfileWritingSection from "@/components/profile/profile-writing-section";
+import UserListModal from "@/components/people/user-list-modal";
+import ShareSheet from "@/components/share/share-sheet";
 import EmptyState, { PageLoader } from "@/components/ui/empty-state";
 import { DotPattern, Splash } from "@/components/ui/patterns";
 import { booksAPI } from "@/lib/api/books";
+import { peopleAPI } from "@/lib/api/people";
+import { absoluteUrl } from "@/lib/share";
 import { tokenManager, userManager } from "@/lib/utils";
 
 const tabs = [
@@ -56,6 +60,8 @@ export default function ProfilePage() {
   const [currentUser, setCurrentUser] = useState<API.User | null>(null);
   const [activeTab, setActiveTab] = useState<TabId>("overview");
   const [editing, setEditing] = useState(false);
+  const [sharing, setSharing] = useState(false);
+  const [list, setList] = useState<"followers" | "following" | null>(null);
 
   useEffect(() => {
     setMounted(true);
@@ -75,6 +81,12 @@ export default function ProfilePage() {
     queryKey: ["authored-books"],
     queryFn: () => booksAPI.getAuthoredBooks(),
     enabled: mounted && tokenManager.hasToken(),
+  });
+
+  const { data: social } = useQuery({
+    queryKey: ["public-profile", currentUser?.username, currentUser?.id],
+    queryFn: () => peopleAPI.getProfile(currentUser!.username),
+    enabled: !!currentUser,
   });
 
   if (!mounted || !currentUser) {
@@ -106,7 +118,13 @@ export default function ProfilePage() {
       sub: totalWords > 0 ? "Across all stories" : "Start writing",
       onClick: () => setActiveTab("writing"),
     },
-    { icon: Users, value: "0", label: "Followers", sub: "Coming soon", onClick: undefined },
+    {
+      icon: Users,
+      value: `${social?.follower_count ?? 0}`,
+      label: social?.follower_count === 1 ? "Follower" : "Followers",
+      sub: social ? `${social.following_count} following` : " ",
+      onClick: () => setList("followers"),
+    },
   ];
 
   const quickActions = [
@@ -159,7 +177,7 @@ export default function ProfilePage() {
                     <Pencil className="h-4 w-4" />
                     Edit profile
                   </button>
-                  <button type="button" aria-label="Share profile" title="Share profile" className="btn btn-outline btn-md !px-0 w-10">
+                  <button type="button" onClick={() => setSharing(true)} aria-label="Share profile" title="Share profile" className="btn btn-outline btn-md !px-0 w-10">
                     <Share2 className="h-4 w-4" />
                   </button>
                 </div>
@@ -170,13 +188,8 @@ export default function ProfilePage() {
           {/* Stats */}
           <div className="mb-8 grid grid-cols-1 gap-3 animate-fade-up stagger-2 sm:grid-cols-3">
             {stats.map(({ icon: Icon, value, label, sub, onClick }) => {
-              const Tag = onClick ? "button" : "div";
               return (
-                <Tag
-                  key={label}
-                  {...(onClick ? { type: "button" as const, onClick } : {})}
-                  className={`card flex items-center gap-4 p-5 text-left ${onClick ? "card-interactive" : ""}`}
-                >
+                <button key={label} type="button" onClick={onClick} className="card card-interactive flex items-center gap-4 p-5 text-left">
                   <span className="icon-tile flex-shrink-0">
                     <Icon className="h-5 w-5" />
                   </span>
@@ -185,7 +198,7 @@ export default function ProfilePage() {
                     <span className="mt-1.5 block text-xs font-semibold text-zinc-700">{label}</span>
                     <span className="block text-xs text-zinc-500">{sub}</span>
                   </span>
-                </Tag>
+                </button>
               );
             })}
           </div>
@@ -325,6 +338,20 @@ export default function ProfilePage() {
         </div>
       </main>
       <Footer />
+      {list && <UserListModal username={profile.username} kind={list} onClose={() => setList(null)} />}
+      {sharing && (
+        <ShareSheet
+          open
+          onClose={() => setSharing(false)}
+          title="Share your profile"
+          description="Anyone with the link can see your public profile."
+          payload={{
+            url: absoluteUrl(`/u/${profile.username}`),
+            title: `${displayName} on Caesura`,
+            text: `Read ${displayName}'s stories on Caesura`,
+          }}
+        />
+      )}
       {editing && <EditProfileModal user={profile} onClose={() => setEditing(false)} onSaved={setCurrentUser} />}
     </>
   );

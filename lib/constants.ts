@@ -54,6 +54,10 @@ export const ENDPOINTS = {
   // Users
   USERS: {
     PROFILE: (username: string) => `/users/${username}/profile`,
+    LIST: '/users',
+    FOLLOW: (username: string) => `/users/${username}/follow`,
+    FOLLOWERS: (username: string) => `/users/${username}/followers`,
+    FOLLOWING: (username: string) => `/users/${username}/following`,
   },
 };
 

@@ -170,6 +170,31 @@ declare global {
       genre_ids?: number[];
     }
 
+    // People (public user listings; never includes email)
+    interface Person {
+      id: string;
+      username: string;
+      display_name?: string;
+      avatar_url?: string;
+      bio?: string;
+      follower_count: number;
+      stories_count: number;
+      is_following: boolean;
+      is_me: boolean;
+    }
+
+    interface PublicProfile extends Person {
+      following_count: number;
+      total_reads: number;
+      created_at: string;
+      stories: BookSummary[];
+    }
+
+    interface FollowResult {
+      following: boolean;
+      follower_count: number;
+    }
+
     // User Profile Types
     interface UserProfile extends User {
       follower_count: number;
