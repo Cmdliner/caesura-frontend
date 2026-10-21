@@ -26,7 +26,6 @@ export const useAuthQuery = {
       ...options,
       staleTime: APP_CONFIG.STALE_TIME,
       gcTime: APP_CONFIG.CACHE_TIME,
-      placeholderData: [],
     }),
 
   /**
@@ -40,7 +39,6 @@ export const useAuthQuery = {
       staleTime: APP_CONFIG.STALE_TIME,
       gcTime: APP_CONFIG.CACHE_TIME,
       enabled: !!bookId,
-      placeholderData: null,
     }),
 };
 
@@ -182,7 +180,6 @@ export const useGenreQueries = {
       queryFn: () => genresAPI.listGenres(),
       staleTime: 5 * 60 * 1000,
       gcTime: 10 * 60 * 1000,
-      placeholderData: [],
       ...options,
     }),
 
@@ -326,7 +323,6 @@ export const useStoriesQuery = {
       queryFn: () => storiesAPI.getUserStories(),
       staleTime: APP_CONFIG.STALE_TIME,
       gcTime: APP_CONFIG.CACHE_TIME,
-      placeholderData: [],
       ...options,
     }),
 

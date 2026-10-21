@@ -33,7 +33,8 @@ export default function LibraryPage() {
   const [activeBook, setActiveBook] = useState<BookItem | null>(null);
   const [layout, setLayout] = useState<"grid" | "list">("grid");
 
-  const { data: libraryItems = [], isLoading, error } = useAuthQuery.useLibrary();
+  const { data: libraryItems = [], isLoading: libraryLoading, error } = useAuthQuery.useLibrary();
+  const isLoading = authLoading || libraryLoading;
 
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
