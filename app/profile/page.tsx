@@ -1,5 +1,6 @@
 "use client";
 
+import { avatarSrc } from "@/lib/avatars";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
@@ -130,9 +131,9 @@ export default function ProfilePage() {
           {/* Identity */}
           <div className="relative -mt-14 mb-8 animate-fade-up sm:-mt-16">
             <div className="flex flex-col gap-5 sm:flex-row sm:items-start">
-              {profile.avatar_url ? (
+              {avatarSrc(profile.avatar_url) ? (
                 <img
-                  src={profile.avatar_url}
+                  src={avatarSrc(profile.avatar_url)}
                   alt={displayName}
                   className="h-28 w-28 flex-shrink-0 rounded-3xl object-cover ring-4 ring-white shadow-card sm:h-32 sm:w-32"
                 />

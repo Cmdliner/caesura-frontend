@@ -1,5 +1,6 @@
 "use client";
 
+import { avatarSrc } from "@/lib/avatars";
 import React, { useState } from "react";
 import Link from "next/link";
 import { useAuth } from "@/app/providers/auth-provider";
@@ -94,9 +95,9 @@ export default function AppHeader({
                 onClick={() => setShowUserMenu(!showUserMenu)}
                 className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-zinc-100 transition-colors"
               >
-                {user.avatar_url ? (
+                {avatarSrc(user.avatar_url) ? (
                   <img
-                    src={user.avatar_url}
+                    src={avatarSrc(user.avatar_url)}
                     alt={user.display_name || user.username}
                     className="h-8 w-8 rounded-full object-cover"
                   />

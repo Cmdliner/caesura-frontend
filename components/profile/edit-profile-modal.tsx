@@ -8,6 +8,7 @@ import Modal from "@/components/ui/modal";
 import { useAuth } from "@/app/providers/auth-provider";
 import { authAPI } from "@/lib/api/auth";
 import type { APIError } from "@/lib/api/client";
+import { AVATAR_PRESETS, avatarSrc, presetId, presetValue } from "@/lib/avatars";
 
 const USERNAME_PATTERN = /^[a-zA-Z0-9_]+$/;
 const BIO_MAX = 500;
@@ -35,15 +36,35 @@ function validate(values: API.UpdateProfileRequest): FieldErrors {
   if (values.display_name.length > 100) errors.display_name = "Display name must not exceed 100 characters.";
   if (values.bio.length > BIO_MAX) errors.bio = `Bio must not exceed ${BIO_MAX} characters.`;
 
-  const avatar = values.avatar_url.trim();
-  if (avatar) {
-    try {
-      if (new URL(avatar).protocol !== "https:") errors.avatar_url = "Use a link that starts with https://";
-    } catch {
-      errors.avatar_url = "That doesn't look like a valid link.";
-    }
-  }
   return errors;
+}
+
+function AvatarOption({
+  label,
+  selected,
+  onSelect,
+  children,
+}: {
+  label: string;
+  selected: boolean;
+  onSelect: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      role="radio"
+      aria-checked={selected}
+      aria-label={label}
+      title={label}
+      onClick={onSelect}
+      className={`aspect-square overflow-hidden rounded-2xl transition-all active:scale-95 ${
+        selected ? "ring-2 ring-brand-600 ring-offset-2" : "opacity-90 hover:opacity-100 hover:scale-105"
+      }`}
+    >
+      {children}
+    </button>
+  );
 }
 
 export default function EditProfileModal({ user, onClose, onSaved }: EditProfileModalProps) {
@@ -60,7 +81,6 @@ export default function EditProfileModal({ user, onClose, onSaved }: EditProfile
   const [errors, setErrors] = useState<FieldErrors>({});
   const [saving, setSaving] = useState(false);
   const [confirmingDiscard, setConfirmingDiscard] = useState(false);
-  const [avatarBroken, setAvatarBroken] = useState(false);
 
   const dirty = (Object.keys(initial) as Field[]).some((k) => values[k].trim() !== initial[k]);
   const usernameChanged = values.username.trim() !== initial.username;
@@ -68,7 +88,6 @@ export default function EditProfileModal({ user, onClose, onSaved }: EditProfile
   const set = (field: Field, value: string) => {
     setValues((v) => ({ ...v, [field]: value }));
     setErrors((e) => ({ ...e, [field]: undefined }));
-    if (field === "avatar_url") setAvatarBroken(false);
   };
 
   const requestClose = () => {
@@ -114,7 +133,9 @@ export default function EditProfileModal({ user, onClose, onSaved }: EditProfile
   };
 
   const previewName = values.display_name.trim() || values.username.trim() || user.username;
-  const showAvatar = values.avatar_url.trim() && !errors.avatar_url && !avatarBroken;
+  const selectedPreset = presetId(values.avatar_url);
+  // Accounts that signed up with Google keep their photo as an option; everyone else only gets the presets.
+  const keepsExistingPhoto = !!initial.avatar_url && !presetId(initial.avatar_url);
 
   return (
     <Modal
@@ -148,40 +169,52 @@ export default function EditProfileModal({ user, onClose, onSaved }: EditProfile
       }
     >
       <form id="edit-profile-form" onSubmit={submit} noValidate className="space-y-5">
-        <div className="flex items-center gap-4">
-          {showAvatar ? (
-            <img
-              src={values.avatar_url.trim()}
-              alt=""
-              onError={() => setAvatarBroken(true)}
-              className="h-16 w-16 flex-shrink-0 rounded-2xl object-cover"
-            />
-          ) : (
-            <div className="flex h-16 w-16 flex-shrink-0 select-none items-center justify-center rounded-2xl bg-brand-600 text-xl font-extrabold text-white">
-              {initials(previewName)}
-            </div>
-          )}
-          <div className="min-w-0 flex-1">
-            <label htmlFor="ep-avatar" className="mb-2 block text-sm font-medium text-zinc-700">
-              Avatar link <span className="font-normal text-zinc-500">(optional)</span>
-            </label>
-            <input
-              id="ep-avatar"
-              type="url"
-              inputMode="url"
-              autoComplete="off"
-              className="field"
-              placeholder="https://…"
-              value={values.avatar_url}
-              onChange={(e) => set("avatar_url", e.target.value)}
-              aria-invalid={!!errors.avatar_url}
-            />
+        <fieldset>
+          <legend className="mb-3 text-sm font-medium text-zinc-700">Avatar</legend>
+          <div className="mb-4 flex items-center gap-4">
+            {avatarSrc(values.avatar_url) ? (
+              <img src={avatarSrc(values.avatar_url)} alt="" className="h-16 w-16 flex-shrink-0 rounded-2xl object-cover" />
+            ) : (
+              <div className="flex h-16 w-16 flex-shrink-0 select-none items-center justify-center rounded-2xl bg-brand-600 text-xl font-extrabold text-white">
+                {initials(previewName)}
+              </div>
+            )}
+            <p className="text-sm text-zinc-500">
+              {selectedPreset ? AVATAR_PRESETS.find((p) => p.id === selectedPreset)?.label : "Pick one, or keep your initials."}
+            </p>
           </div>
-        </div>
-        {errors.avatar_url && <p className="-mt-3 text-xs text-red-600">{errors.avatar_url}</p>}
-        {avatarBroken && !errors.avatar_url && (
-          <p className="-mt-3 text-xs text-zinc-500">We couldn&apos;t load that image, so initials will be used.</p>
-        )}
+          <div role="radiogroup" aria-label="Avatar" className="grid grid-cols-5 gap-2 sm:gap-3">
+            <AvatarOption
+              label="Use my initials"
+              selected={!values.avatar_url}
+              onSelect={() => set("avatar_url", "")}
+            >
+              <span className="flex h-full w-full items-center justify-center bg-brand-600 text-sm font-extrabold text-white">
+                {initials(previewName)}
+              </span>
+            </AvatarOption>
+            {keepsExistingPhoto && (
+              <AvatarOption
+                label="Current photo"
+                selected={values.avatar_url === initial.avatar_url}
+                onSelect={() => set("avatar_url", initial.avatar_url)}
+              >
+                <img src={initial.avatar_url} alt="" className="h-full w-full object-cover" />
+              </AvatarOption>
+            )}
+            {AVATAR_PRESETS.map((p) => (
+              <AvatarOption
+                key={p.id}
+                label={p.label}
+                selected={selectedPreset === p.id}
+                onSelect={() => set("avatar_url", presetValue(p.id))}
+              >
+                <img src={`/avatars/${p.id}.svg`} alt="" className="h-full w-full object-cover" />
+              </AvatarOption>
+            ))}
+          </div>
+          {errors.avatar_url && <p className="mt-2 text-xs text-red-600">{errors.avatar_url}</p>}
+        </fieldset>
 
         <div>
           <label htmlFor="ep-display" className="mb-2 block text-sm font-medium text-zinc-700">

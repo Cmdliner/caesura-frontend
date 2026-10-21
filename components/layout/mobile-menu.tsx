@@ -1,5 +1,6 @@
 "use client";
 
+import { avatarSrc } from "@/lib/avatars";
 import Link from "next/link";
 import Logo from "@/components/ui/logo";
 import { useEffect, useRef, type ReactNode } from "react";
@@ -128,8 +129,8 @@ export default function MobileMenu({
           {isLoading ? null : isAuthenticated && user ? (
             <div className="space-y-3">
               <div className="flex items-center gap-3">
-                {user.avatar_url ? (
-                  <img src={user.avatar_url} alt="" className="h-11 w-11 rounded-full object-cover" />
+                {avatarSrc(user.avatar_url) ? (
+                  <img src={avatarSrc(user.avatar_url)} alt="" className="h-11 w-11 rounded-full object-cover" />
                 ) : (
                   <span className="flex h-11 w-11 items-center justify-center rounded-full bg-brand-600 text-base font-semibold text-white">
                     {(name || "U")[0].toUpperCase()}

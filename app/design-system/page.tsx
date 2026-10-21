@@ -11,6 +11,7 @@ import {
 import Logo, { LogoMark } from "@/components/ui/logo";
 import Alert from "@/components/ui/alert";
 import Modal from "@/components/ui/modal";
+import { AVATAR_PRESETS } from "@/lib/avatars";
 import EmptyState, { ErrorState, PageLoader } from "@/components/ui/empty-state";
 import SectionHeading from "@/components/ui/section-heading";
 import { DotPattern, Splash } from "@/components/ui/patterns";
@@ -29,6 +30,7 @@ const sections = [
   ["nav", "Navigation"],
   ["forms", "Forms & feedback"],
   ["surfaces", "Surfaces"],
+  ["avatars", "Avatars"],
   ["patterns", "Patterns"],
   ["states", "States"],
   ["icons", "Icons"],
@@ -399,6 +401,18 @@ export default function DesignSystemPage() {
           <div className="flex flex-wrap gap-2">
             {["All", "Fantasy", "Romance", "Sci-Fi"].map((c) => (
               <button key={c} className="chip" aria-pressed={chip === c} onClick={() => setChip(c)}>{c}</button>
+            ))}
+          </div>
+        </Section>
+
+        {/* ───────── Avatars ───────── */}
+        <Section id="avatars" title="Avatars" intro="Nine preset characters, drawn flat in the brand palette (orange, zinc, white; no gradients or glow) and each tied to reading or writing. Stored as preset:id and drawn from /avatars/id.svg. Compose within the middle 80% of the square so they survive a circle crop.">
+          <div className="grid grid-cols-3 gap-4 sm:grid-cols-5 lg:grid-cols-9">
+            {AVATAR_PRESETS.map((p) => (
+              <figure key={p.id} className="text-center">
+                <img src={`/avatars/${p.id}.svg`} alt="" className="aspect-square w-full rounded-2xl object-cover" />
+                <figcaption className="mt-2 text-xs font-medium text-zinc-600">{p.label}</figcaption>
+              </figure>
             ))}
           </div>
         </Section>

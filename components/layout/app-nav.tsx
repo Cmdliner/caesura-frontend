@@ -1,5 +1,6 @@
 "use client";
 
+import { avatarSrc } from "@/lib/avatars";
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import Logo from "@/components/ui/logo";
@@ -87,8 +88,8 @@ export default function AppNav() {
 
   const Avatar = ({ size }: { size: "sm" | "lg" }) => {
     const dims = size === "sm" ? "h-8 w-8 text-[13px]" : "h-11 w-11 text-base";
-    return user?.avatar_url ? (
-      <img src={user.avatar_url} alt="" className={`${dims} rounded-full object-cover`} />
+    return avatarSrc(user?.avatar_url) ? (
+      <img src={avatarSrc(user?.avatar_url)} alt="" className={`${dims} rounded-full object-cover`} />
     ) : (
       <span className={`${dims} flex items-center justify-center rounded-full bg-brand-600 font-semibold text-white`}>
         {initials}

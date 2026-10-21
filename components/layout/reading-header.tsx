@@ -1,5 +1,6 @@
 "use client";
 
+import { avatarSrc } from "@/lib/avatars";
 import Link from "next/link";
 import { useState } from "react";
 import { useAuth } from "@/app/providers/auth-provider";
@@ -91,9 +92,9 @@ export default function ReadingHeader({
                 onClick={() => setShowUserMenu(!showUserMenu)}
                 className="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-zinc-100 transition-colors"
               >
-                {user.avatar_url ? (
+                {avatarSrc(user.avatar_url) ? (
                   <img
-                    src={user.avatar_url}
+                    src={avatarSrc(user.avatar_url)}
                     alt={user.display_name || user.username}
                     className="h-7 w-7 rounded-full object-cover"
                   />

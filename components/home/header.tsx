@@ -1,5 +1,6 @@
 "use client";
 
+import { avatarSrc } from "@/lib/avatars";
 import Link from "next/link";
 import Logo from "@/components/ui/logo";
 import { useRouter } from "next/navigation";
@@ -125,8 +126,8 @@ export default function Header({ solid = false }: { solid?: boolean }) {
                                     light ? "text-white hover:bg-white/10" : "text-zinc-800 hover:bg-zinc-100"
                                 }`}
                             >
-                                {user?.avatar_url ? (
-                                    <img src={user.avatar_url} alt="" className="h-8 w-8 rounded-full object-cover" />
+                                {avatarSrc(user?.avatar_url) ? (
+                                    <img src={avatarSrc(user?.avatar_url)} alt="" className="h-8 w-8 rounded-full object-cover" />
                                 ) : (
                                     <span className="flex h-8 w-8 items-center justify-center rounded-full bg-orange-600 text-sm font-semibold text-white">
                                         {user?.username?.[0]?.toUpperCase() || "U"}

@@ -68,6 +68,9 @@ Never use raw `orange-*`; use `brand-*`. Never use `bg-black`; use `zinc-950`.
 | `CommunityHero` / `CommunityTabs` / `FeatureGrid` / `DarkSteps` (`components/community/blocks.tsx`) | Shared layout for Forums, Reading Clubs and Contests: hero with an illustrative preview card, section switcher, feature cards, numbered dark steps |
 | `MenuButton` (layout) | Mobile menu trigger: `pill` (default) / `dots` / `lines` |
 
+## Avatars
+Nine preset characters in `public/avatars/*.svg` (fox, owl, cat, bookworm, penguin, bear, robot, ghost, dragon): flat, brand palette only, each holding or wearing something reading-related. A user's `avatar_url` is `preset:<id>`; render it with `avatarSrc()` from `lib/avatars.ts` (never use `avatar_url` as an `src` directly). Add a new one in three places: the SVG, `AVATAR_PRESETS`, and the backend `AvatarPresets`. Keep the subject inside the middle 80% of the square so it survives a circle crop.
+
 ## Icons
 Use **Lucide** (`lucide-react`). Default `h-4 w-4` inline with text, `h-5 w-5` in icon tiles, `strokeWidth={1.6}` for large decorative icons. Don't paste inline `<svg>` paths; the one exception is social brand marks (Lucide has none), see `components/layout/footer.tsx`.
 
