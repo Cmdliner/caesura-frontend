@@ -51,56 +51,50 @@ export default function PersonCard({ person }: { person: API.Person }) {
   const banner = bannerFor(person.username);
 
   return (
-    <div className="card flex flex-col overflow-hidden">
-      <div className={`relative h-16 overflow-hidden ${banner.bg}`}>
-        <Splash variant={banner.variant} className={`-right-6 -top-16 h-44 w-44 ${banner.splash}`} />
-      </div>
+    <div className={`card relative flex flex-col gap-4 overflow-hidden p-5 ${banner.bg}`}>
+      <Splash variant={banner.variant} className={`-right-12 -top-20 h-64 w-64 ${banner.splash}`} />
+      <Splash variant="c" className={`-bottom-10 -left-8 h-28 w-28 ${banner.splash}`} />
 
-      <div className="flex flex-1 flex-col gap-4 px-5 pb-5">
-        <Link href={`/u/${person.username}`} className="relative -mt-8 block w-fit" aria-label={`${name}'s profile`}>
-          <PersonAvatar person={person} className="h-16 w-16 text-xl ring-4 ring-white" />
+      <Link href={`/u/${person.username}`} className="relative block w-fit" aria-label={`${name}'s profile`}>
+        <PersonAvatar person={person} className="h-16 w-16 text-xl ring-4 ring-white" />
+      </Link>
+
+      <div className="relative min-w-0">
+        <Link href={`/u/${person.username}`} className="block truncate font-bold text-zinc-950 hover:text-brand-700">
+          {name}
         </Link>
-
-        <div className="min-w-0">
-          <Link href={`/u/${person.username}`} className="block truncate font-bold text-zinc-950 hover:text-brand-700">
-            {name}
-          </Link>
-          <p className="truncate text-sm text-zinc-500">@{person.username}</p>
-        </div>
-
-        {person.bio ? (
-          <p className="line-clamp-2 text-sm leading-relaxed text-zinc-600">{person.bio}</p>
-        ) : (
-          <p className="text-sm text-zinc-400">No bio yet.</p>
-        )}
-
-        <dl className="mt-auto grid grid-cols-2 divide-x divide-zinc-200 rounded-xl bg-zinc-50 py-2.5 text-center">
-          <div>
-            <dd className="text-sm font-bold tabular-nums text-zinc-950">{followers.toLocaleString()}</dd>
-            <dt className="text-xs text-zinc-500">{followers === 1 ? "Follower" : "Followers"}</dt>
-          </div>
-          <div>
-            <dd className="text-sm font-bold tabular-nums text-zinc-950">{person.stories_count.toLocaleString()}</dd>
-            <dt className="text-xs text-zinc-500">{person.stories_count === 1 ? "Story" : "Stories"}</dt>
-          </div>
-        </dl>
+        <p className="truncate text-sm text-zinc-600">@{person.username}</p>
       </div>
 
-      <div className={`relative overflow-hidden border-t border-zinc-100 px-5 py-4 ${banner.bg}`}>
-        <Splash variant={banner.variant} className={`-bottom-20 -left-8 h-36 w-36 rotate-180 ${banner.splash}`} />
-        <div className="relative [&>*]:w-full [&>button]:w-full">
-          {person.is_me ? (
-            <Link href="/profile" className="btn btn-outline btn-md bg-white">
-              This is you
-            </Link>
-          ) : (
-            <FollowButton
-              username={person.username}
-              isFollowing={person.is_following}
-              onChange={(r) => setFollowers(r.follower_count)}
-            />
-          )}
+      {person.bio ? (
+        <p className="relative line-clamp-2 text-sm leading-relaxed text-zinc-700">{person.bio}</p>
+      ) : (
+        <p className="relative text-sm text-zinc-500">No bio yet.</p>
+      )}
+
+      <dl className="relative mt-auto grid grid-cols-2 divide-x divide-zinc-900/10 rounded-xl bg-white/70 py-2.5 text-center">
+        <div>
+          <dd className="text-sm font-bold tabular-nums text-zinc-950">{followers.toLocaleString()}</dd>
+          <dt className="text-xs text-zinc-600">{followers === 1 ? "Follower" : "Followers"}</dt>
         </div>
+        <div>
+          <dd className="text-sm font-bold tabular-nums text-zinc-950">{person.stories_count.toLocaleString()}</dd>
+          <dt className="text-xs text-zinc-600">{person.stories_count === 1 ? "Story" : "Stories"}</dt>
+        </div>
+      </dl>
+
+      <div className="relative [&>*]:w-full">
+        {person.is_me ? (
+          <Link href="/profile" className="btn btn-outline btn-md bg-white">
+            This is you
+          </Link>
+        ) : (
+          <FollowButton
+            username={person.username}
+            isFollowing={person.is_following}
+            onChange={(r) => setFollowers(r.follower_count)}
+          />
+        )}
       </div>
     </div>
   );
