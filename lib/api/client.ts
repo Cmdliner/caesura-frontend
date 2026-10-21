@@ -1,6 +1,6 @@
 import axios, { AxiosInstance, AxiosError, InternalAxiosRequestConfig } from 'axios';
 import { API_BASE_URL, API_TIMEOUT } from '@/lib/constants';
-import { tokenManager } from '@/lib/utils';
+import { clearAuth, tokenManager } from '@/lib/utils';
 
 export interface APIError {
   message: string;
@@ -37,6 +37,12 @@ class APIClient {
     this.client.interceptors.response.use(
       (response) => response,
       (error: AxiosError) => {
+        // A 401 while holding a token means the session expired: drop it so the app stops treating us as signed in.
+        if (error.response?.status === 401 && tokenManager.hasToken() && typeof window !== 'undefined') {
+          clearAuth();
+          if (!window.location.pathname.startsWith('/login')) window.location.assign('/login');
+        }
+
         // No response means the request never reached the API (offline, server down, CORS, timeout).
         const unreachable = !error.response
           ? error.code === 'ECONNABORTED'
