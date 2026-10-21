@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import AppNav from "@/components/layout/app-nav";
 import Footer from "@/components/layout/footer";
+import EditProfileModal from "@/components/profile/edit-profile-modal";
 import ProfileWritingSection from "@/components/profile/profile-writing-section";
 import EmptyState, { PageLoader } from "@/components/ui/empty-state";
 import { DotPattern, Splash } from "@/components/ui/patterns";
@@ -53,6 +54,7 @@ export default function ProfilePage() {
   const [mounted, setMounted] = useState(false);
   const [currentUser, setCurrentUser] = useState<API.User | null>(null);
   const [activeTab, setActiveTab] = useState<TabId>("overview");
+  const [editing, setEditing] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -152,7 +154,7 @@ export default function ProfilePage() {
                 </div>
 
                 <div className="flex flex-shrink-0 gap-2">
-                  <button type="button" className="btn btn-dark btn-md">
+                  <button type="button" onClick={() => setEditing(true)} className="btn btn-dark btn-md">
                     <Pencil className="h-4 w-4" />
                     Edit profile
                   </button>
@@ -322,6 +324,7 @@ export default function ProfilePage() {
         </div>
       </main>
       <Footer />
+      {editing && <EditProfileModal user={profile} onClose={() => setEditing(false)} onSaved={setCurrentUser} />}
     </>
   );
 }

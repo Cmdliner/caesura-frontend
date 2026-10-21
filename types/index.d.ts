@@ -11,6 +11,13 @@ declare global {
       created_at: string;
     }
 
+    interface UpdateProfileRequest {
+      username: string;
+      display_name: string;
+      bio: string;
+      avatar_url: string;
+    }
+
     interface AuthResponse {
       token: string;
       user: User;

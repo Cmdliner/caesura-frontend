@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import Logo, { LogoMark } from "@/components/ui/logo";
 import Alert from "@/components/ui/alert";
+import Modal from "@/components/ui/modal";
 import EmptyState, { ErrorState, PageLoader } from "@/components/ui/empty-state";
 import SectionHeading from "@/components/ui/section-heading";
 import { DotPattern, Splash } from "@/components/ui/patterns";
@@ -91,6 +92,7 @@ const iconSet: [string, LucideIcon][] = [
 
 export default function DesignSystemPage() {
   const [chip, setChip] = useState("All");
+  const [modalOpen, setModalOpen] = useState(false);
 
   return (
     <main className="min-h-screen bg-white">
@@ -340,6 +342,19 @@ export default function DesignSystemPage() {
                   <button className="btn btn-outline btn-md" onClick={() => toast.error("Couldn't sign you in", { description: "Invalid email or password" })}>Error</button>
                   <button className="btn btn-outline btn-md" onClick={() => { const id = toast.loading("Adding to library…"); setTimeout(() => toast.success("Added!", { id }), 1200); }}>Loading → success</button>
                 </div>
+              </div>
+              <div>
+                <Sub>Modal</Sub>
+                <button className="btn btn-outline btn-md" onClick={() => setModalOpen(true)}>Open modal</button>
+                <Modal
+                  open={modalOpen}
+                  onRequestClose={() => setModalOpen(false)}
+                  title="Edit profile"
+                  description="Centred card on desktop, bottom sheet on phones."
+                  footer={<div className="flex justify-end gap-2"><button className="btn btn-outline btn-md" onClick={() => setModalOpen(false)}>Cancel</button><button className="btn btn-primary btn-md" onClick={() => setModalOpen(false)}>Save changes</button></div>}
+                >
+                  <p className="text-sm text-zinc-600">Esc, the backdrop and the close button all call onRequestClose, so the parent can ask before discarding unsaved edits.</p>
+                </Modal>
               </div>
               <div>
                 <Sub>Alerts (inline)</Sub>

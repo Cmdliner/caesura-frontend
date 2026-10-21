@@ -59,8 +59,10 @@ export const authAPI = {
     return 'id' in response.data ? response.data as API.UserProfile : response.data.user;
   },
 
-  updateProfile: async (data: Partial<API.User>): Promise<API.UserProfile> => {
-    const response = await apiClient.patch<{ user: API.UserProfile }>(ENDPOINTS.AUTH.PROFILE, data);
-    return response.data.user;
+  /** Returns a fresh token too: it carries the username, which may have just changed. */
+  updateProfile: async (data: API.UpdateProfileRequest): Promise<API.AuthResponse> => {
+    const response = await apiClient.patch<API.AuthResponse>(ENDPOINTS.AUTH.PROFILE, data);
+    setAuth(response.data);
+    return response.data;
   },
 };

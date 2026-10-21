@@ -12,7 +12,7 @@ export const ENDPOINTS = {
     FORGOT_PASSWORD: '/auth/forgot-password',
     RESET_PASSWORD: '/auth/reset-password',
     REFRESH: '/auth/refresh',
-    PROFILE: '/auth/profile',
+    PROFILE: '/user/profile',
   },
   // Books
   BOOKS: {

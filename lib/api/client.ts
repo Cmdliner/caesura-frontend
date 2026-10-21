@@ -6,6 +6,8 @@ export interface APIError {
   message: string;
   status?: number;
   code?: string;
+  /** Per-field messages from a 409/422, keyed by snake_case field name. */
+  errors?: Record<string, string[]>;
 }
 
 class APIClient {
@@ -54,6 +56,9 @@ class APIClient {
             apiError.message = String(data.error);
           } else if ('message' in data) {
             apiError.message = String(data.message);
+          }
+          if (data.errors && typeof data.errors === 'object') {
+            apiError.errors = data.errors as Record<string, string[]>;
           }
         }
 
