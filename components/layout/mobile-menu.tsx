@@ -4,6 +4,7 @@ import { avatarSrc } from "@/lib/avatars";
 import Link from "next/link";
 import Logo from "@/components/ui/logo";
 import { useEffect, useRef, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 import { ChevronRight, LogOut, User as UserIcon, X, type LucideIcon } from "lucide-react";
 import { DotPattern, Splash } from "@/components/ui/patterns";
 
@@ -62,7 +63,9 @@ export default function MobileMenu({
 
   const name = user?.display_name || user?.username || "";
 
-  return (
+  // Portalled to <body>: the headers that render this get a backdrop-filter once scrolled, which would make
+  // them the containing block for `fixed` and clip the sheet to the header's height.
+  return createPortal(
     <div className="pointer-events-auto fixed inset-0 z-[70] md:hidden" role="dialog" aria-modal="true" aria-label="Menu">
       <button
         type="button"
@@ -164,6 +167,7 @@ export default function MobileMenu({
           )}
         </div>
       </aside>
-    </div>
+    </div>,
+    document.body,
   );
 }
