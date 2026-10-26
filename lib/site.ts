@@ -6,6 +6,6 @@
  * - `lastUpdated`: bump when the Privacy Policy or Terms change.
  */
 export const site = {
-  supportEmail: "",
-  lastUpdated: "October 19, 2026",
+  supportEmail: "research@adeyemiabiade.me",
+  lastUpdated: "October 26, 2026",
 };
