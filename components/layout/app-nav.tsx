@@ -15,7 +15,6 @@ import {
   Smartphone,
   User,
   type LucideIcon,
-  UsersRound,
 } from "lucide-react";
 import { useAuth } from "@/app/providers/auth-provider";
 import { tokenManager, userManager } from "@/lib/utils";
@@ -28,7 +27,6 @@ type NavItem = { label: string; href: string; icon: LucideIcon };
 const publicLinks: NavItem[] = [
   { label: "Browse", href: "/discover", icon: Compass },
   { label: "Genres", href: "/genres", icon: Shapes },
-  { label: "People", href: "/people", icon: UsersRound },
 ];
 const memberLinks: NavItem[] = [...publicLinks, { label: "Library", href: "/library", icon: BookOpen }];
 
@@ -128,6 +126,7 @@ export default function AppNav() {
 
         {/* Desktop actions */}
         <div className="ml-auto hidden flex-shrink-0 items-center gap-2.5 md:flex">
+          <SearchBar />
           {isLoading ? null : !isAuthenticated ? (
             <>
               <Link href="/login" className="btn btn-outline btn-md">
@@ -139,7 +138,6 @@ export default function AppNav() {
             </>
           ) : (
             <>
-              <SearchBar />
               <Link href="/write" className="btn btn-primary btn-md">
                 <PenLine className="h-4 w-4" />
                 Write
@@ -229,7 +227,7 @@ export default function AppNav() {
         isLoading={isLoading}
         user={user}
         onLogout={handleLogout}
-        top={isAuthenticated ? <SearchBar /> : undefined}
+        top={<SearchBar />}
       />
     </header>
   );

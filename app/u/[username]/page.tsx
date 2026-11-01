@@ -64,8 +64,8 @@ export default function PublicProfilePage() {
             title="We couldn't find that person"
             description={`Nobody goes by @${username}. They may have changed their username.`}
             action={
-              <Link href="/people" className="btn btn-dark btn-md">
-                Find people
+              <Link href="/discover" className="btn btn-dark btn-md">
+                Back to Discover
               </Link>
             }
           />
@@ -79,7 +79,7 @@ export default function PublicProfilePage() {
       <>
         <AppNav />
         <main className="pt-[60px]">
-          <ErrorState fullPage title="Couldn't load this profile" onRetry={() => refetch()} backHref="/people" backLabel="Find people" />
+          <ErrorState fullPage title="Couldn't load this profile" onRetry={() => refetch()} backHref="/discover" backLabel="Back to Discover" />
         </main>
       </>
     );
